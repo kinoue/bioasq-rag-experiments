@@ -1,0 +1,2456 @@
+{
+  "created": "2026-10-28T12:28:02+00:00",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "reranker_model": "BAAI/bge-reranker-base",
+  "candidates": 20,
+  "top_k": 5,
+  "num_questions": 100,
+  "hardware": {
+    "device": "cpu",
+    "cpu": "Apple M3 Max",
+    "cpu_cores": 14,
+    "platform": "macOS-15.1-arm64-arm-64bit",
+    "python": "3.12.7",
+    "torch": "2.14.1",
+    "torch_threads": 10
+  },
+  "aggregate": {
+    "baseline": {
+      "recall@5": 0.727654761904762,
+      "mrr@5": 0.9428333333333333,
+      "ndcg@5": 0.8706571206235424,
+      "recall@20": 0.9214563492063492
+    },
+    "reranked": {
+      "recall@5": 0.7316428571428572,
+      "mrr@5": 0.9491666666666667,
+      "ndcg@5": 0.8753356822724431,
+      "recall@20": 0.9214563492063492
+    },
+    "all_candidates_identical": true,
+    "latency_ms": {
+      "retrieval": {
+        "mean": 13.174080848693848,
+        "median": 13.002562103793025,
+        "p90": 14.629212534055114
+      },
+      "reranking": {
+        "mean": 1667.444403753616,
+        "median": 1660.778812598437,
+        "p90": 1746.6592996846884
+      },
+      "total": {
+        "mean": 1680.6184846023098,
+        "median": 1674.0364376455545,
+        "p90": 1758.9553331956267
+      }
+    },
+    "ndcg@5_outcomes": {
+      "improved": 24,
+      "unchanged": 58,
+      "degraded": 18
+    }
+  },
+  "per_question": [
+    {
+      "id": "5c72f9847c78d69471000081",
+      "question": "Describe symptoms of the Visual snow syndrome.",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.653624940663576,
+        "reranking": 1621.960291173309,
+        "total": 1633.6139161139727
+      }
+    },
+    {
+      "id": "516c0dc6298dcd4e5100006c",
+      "question": "What is the role of AMPK kinase in myocardial remodeling after myocardial infarction",
+      "type": "summary",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8539316501572937
+      },
+      "reranked": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 0.8,
+      "recall@20_reranked": 0.8,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.789917204529047,
+        "reranking": 1670.357707887888,
+        "total": 1686.147625092417
+      }
+    },
+    {
+      "id": "53372ba3d6d3ac6a34000058",
+      "question": "Which histone modification is primarily linked to elongating transcription?",
+      "type": "factoid",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.125,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.3391602052736161
+      },
+      "reranked": {
+        "recall@5": 0.375,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6164336326286644
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.57604207098484,
+        "reranking": 1637.4555407091975,
+        "total": 1652.0315827801824
+      }
+    },
+    {
+      "id": "54fc98f16ad7dcbc12000003",
+      "question": "Describe the mechanism of action of drisapersen",
+      "type": "summary",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.8333333333333334,
+      "recall@20_reranked": 0.8333333333333334,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.56162503361702,
+        "reranking": 1644.3742089904845,
+        "total": 1657.9358340241015
+      }
+    },
+    {
+      "id": "52f89f4f2059c6d71c00004e",
+      "question": "Which genes have been found mutated in Gray platelet syndrome patients?",
+      "type": "list",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.194709248840809,
+        "reranking": 1659.987207967788,
+        "total": 1674.1819172166288
+      }
+    },
+    {
+      "id": "5e4025f148dab47f2600000b",
+      "question": "What does a PET (Positron Excitation Tomography) measure?",
+      "type": "summary",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8539316501572937
+      },
+      "reranked": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.535583090037107,
+        "reranking": 1716.0223331302404,
+        "total": 1730.5579162202775
+      }
+    },
+    {
+      "id": "5fe31317a43ad31278000044",
+      "question": "The formation of which inflammatory molecule is regulated by MAP3K8 (TPL2)?",
+      "type": "factoid",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.8888888888888888,
+      "recall@20_reranked": 0.8888888888888888,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.231749810278416,
+        "reranking": 1644.6307920850813,
+        "total": 1658.8625418953598
+      }
+    },
+    {
+      "id": "5a8941c5bc7bade53a000002",
+      "question": "Which aminoacid position in the human CREB protein is phosphorylated?",
+      "type": "factoid",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584
+      },
+      "recall@20_baseline": 0.5,
+      "recall@20_reranked": 0.5,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.006457757204771,
+        "reranking": 1663.269666954875,
+        "total": 1677.2761247120798
+      }
+    },
+    {
+      "id": "5c88550075a4a5d219000008",
+      "question": "List 3 apoE mimetics.",
+      "type": "list",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.18624971807003,
+        "reranking": 1753.0536660924554,
+        "total": 1765.2399158105254
+      }
+    },
+    {
+      "id": "54ede34694afd61504000004",
+      "question": "Which is the genetic cause for the development of Fanconi anemia complementation group D1?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.2857142857142857,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.34519134224686937
+      },
+      "reranked": {
+        "recall@5": 0.2857142857142857,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.5531464700081437
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.661791872233152,
+        "reranking": 1684.0272080153227,
+        "total": 1696.6889998875558
+      }
+    },
+    {
+      "id": "6278df3c56bf9aee6f000015",
+      "question": "Which models are used for predicting disease progression in Duchenne Muscular Dystrophy?",
+      "type": "list",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.778707943856716,
+        "reranking": 1746.8393752351403,
+        "total": 1760.618083178997
+      }
+    },
+    {
+      "id": "56e310a151531f7e33000017",
+      "question": "Do RNA:DNA hybrids preferentially form in high or low GC regions?",
+      "type": "yesno",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7227265726449519
+      },
+      "reranked": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 0.8,
+      "recall@20_reranked": 0.8,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.445209108293056,
+        "reranking": 1705.19550004974,
+        "total": 1720.6407091580331
+      }
+    },
+    {
+      "id": "5fdb2e74a43ad3127800000d",
+      "question": "Which master regulator drives liver development?",
+      "type": "factoid",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.373041223734617,
+        "reranking": 1637.1217500418425,
+        "total": 1651.494791265577
+      }
+    },
+    {
+      "id": "5c98fcf0ecadf2e73f00002c",
+      "question": "What is the mode of action of the Tc toxins?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.42857142857142855,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6548086577531307
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.958666309714317,
+        "reranking": 1624.8757089488208,
+        "total": 1637.8343752585351
+      }
+    },
+    {
+      "id": "5e920ddf2d3121100d00000d",
+      "question": "What is endoplasmic reticulum stress?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.588915880769491,
+        "reranking": 1618.1313749402761,
+        "total": 1630.7202908210456
+      }
+    },
+    {
+      "id": "532f0b2cd6d3ac6a3400002c",
+      "question": "Which are the musculoskeletal manifestations of Marfan syndrome?",
+      "type": "list",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7227265726449519
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.357416726648808,
+        "reranking": 1659.5160001888871,
+        "total": 1672.873416915536
+      }
+    },
+    {
+      "id": "5c5215e67e3cb0e231000004",
+      "question": "Have machine learning methods been used to predict the severity of major depressive disorder(MDD)?",
+      "type": "yesno",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.944165781140327,
+        "reranking": 1670.2707088552415,
+        "total": 1684.2148746363819
+      }
+    },
+    {
+      "id": "515deafd298dcd4e51000025",
+      "question": "List the endoscopic diagnoses that have been reported in children with autism",
+      "type": "list",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.278416685760021,
+        "reranking": 1769.932582974434,
+        "total": 1785.210999660194
+      }
+    },
+    {
+      "id": "5e6e4a6c51b80c9423000002",
+      "question": "List the components of the COMPASS complex",
+      "type": "list",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.092874851077795,
+        "reranking": 1699.520000256598,
+        "total": 1711.6128751076758
+      }
+    },
+    {
+      "id": "54d8e319014675820d000009",
+      "question": "What are the main characteristics of Catecholaminergic Polymorphic Ventricular Tachycardia (CPVT)?",
+      "type": "summary",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.945292077958584,
+        "reranking": 1690.3745830059052,
+        "total": 1706.3198750838637
+      }
+    },
+    {
+      "id": "5c76d31c7c78d694710000a9",
+      "question": "What is filipin staining used for?",
+      "type": "summary",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 0.2,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.14606834984270645
+      },
+      "reranked": {
+        "recall@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7227265726449519
+      },
+      "recall@20_baseline": 0.6,
+      "recall@20_reranked": 0.6,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.778125073760748,
+        "reranking": 1699.754832778126,
+        "total": 1711.5329578518867
+      }
+    },
+    {
+      "id": "5c74266a7c78d694710000a2",
+      "question": "Which biological process takes place in nuclear speckles?",
+      "type": "factoid",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.2222222222222222,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.34519134224686937
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.068082742393017,
+        "reranking": 1643.8139583915472,
+        "total": 1656.8820411339402
+      }
+    },
+    {
+      "id": "51be03c4047fa84d1d000004",
+      "question": "Describe the known functions for the prothymosin alpha c-terminal peptide?",
+      "type": "summary",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.429333291947842,
+        "reranking": 1716.8271667324007,
+        "total": 1729.2565000243485
+      }
+    },
+    {
+      "id": "60266b371cb411341a0000c2",
+      "question": "Which drugs are included in the CNIC polypill?",
+      "type": "list",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.90604192763567,
+        "reranking": 1730.0642081536353,
+        "total": 1742.970250081271
+      }
+    },
+    {
+      "id": "5e44c18648dab47f2600001f",
+      "question": "Does gavestinel improve outcomes of stroke patients?",
+      "type": "yesno",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.660792261362076,
+        "reranking": 1791.4652498438954,
+        "total": 1805.1260421052575
+      }
+    },
+    {
+      "id": "5a70ce82b750ff4455000065",
+      "question": "What is the mode of action of the drug Prolia?",
+      "type": "factoid",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6713860725233041
+      },
+      "reranked": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7653606369886217
+      },
+      "recall@20_baseline": 0.6666666666666666,
+      "recall@20_reranked": 0.6666666666666666,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.198999989777803,
+        "reranking": 1748.770833015442,
+        "total": 1760.9698330052197
+      }
+    },
+    {
+      "id": "531b1e3cb166e2b80600003b",
+      "question": "Which histone modifications are associated with Polycomb group (PcG) proteins?",
+      "type": "list",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.156208977103233,
+        "reranking": 1632.8403749503195,
+        "total": 1644.9965839274228
+      }
+    },
+    {
+      "id": "6024a5891cb411341a0000a3",
+      "question": "What is Corkscrew Esophagus?",
+      "type": "summary",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.9082091152668,
+        "reranking": 1645.5058748833835,
+        "total": 1658.4140839986503
+      }
+    },
+    {
+      "id": "5a6e18d8b750ff4455000038",
+      "question": "Are Conserved Nonexonic Elements (CNEEs) important in phylogenomics research?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.804624952375889,
+        "reranking": 1674.5284590870142,
+        "total": 1689.33308403939
+      }
+    },
+    {
+      "id": "6025d88c1cb411341a0000b6",
+      "question": "Is vocimagene amiretrorepvec effective for glioblastoma?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.919249642640352,
+        "reranking": 1658.2720424048603,
+        "total": 1672.1912920475006
+      }
+    },
+    {
+      "id": "5e35d7cd158f994d3a000005",
+      "question": "What is the BioPlex network?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.218499884009361,
+        "reranking": 1626.3950830325484,
+        "total": 1640.6135829165578
+      }
+    },
+    {
+      "id": "6020a8431cb411341a00007f",
+      "question": "Which CD38 antibody has been shown to be effective for Lupus Erythematosus?",
+      "type": "factoid",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.181583024561405,
+        "reranking": 1663.5425416752696,
+        "total": 1676.724124699831
+      }
+    },
+    {
+      "id": "5c629937e842deac67000008",
+      "question": "What is the most common monogenic cause of common variable immunodeficiency (CVID) in Europeans?",
+      "type": "factoid",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.237917192280293,
+        "reranking": 1657.533582765609,
+        "total": 1672.7714999578893
+      }
+    },
+    {
+      "id": "515dd3d5298dcd4e5100001c",
+      "question": "In what proportion of children with heart failure has Enalapril been shown to be safe and effective?",
+      "type": "factoid",
+      "num_relevant": 10,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.9,
+      "recall@20_reranked": 0.9,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.892583850771189,
+        "reranking": 1661.7232910357416,
+        "total": 1674.6158748865128
+      }
+    },
+    {
+      "id": "5c73ad097c78d69471000092",
+      "question": "What is the mechanism of action of Solriamfetol?",
+      "type": "summary",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.503750156611204,
+        "reranking": 1646.6626250185072,
+        "total": 1659.1663751751184
+      }
+    },
+    {
+      "id": "515dd9a0298dcd4e5100001e",
+      "question": "What are the clinical trial outcomes of metformin use in polycystic ovary disease?",
+      "type": "summary",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.797082774341106,
+        "reranking": 1609.7735832445323,
+        "total": 1622.5706660188735
+      }
+    },
+    {
+      "id": "58f4b1a170f9fc6f0f000010",
+      "question": "Which mushroom is poisonous, Amanita phalloides or Agaricus Bisporus",
+      "type": "factoid",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.71637498959899,
+        "reranking": 1585.4797079227865,
+        "total": 1599.1960829123855
+      }
+    },
+    {
+      "id": "60234dc61cb411341a000094",
+      "question": "Which disease is treated with Emapalumab?",
+      "type": "factoid",
+      "num_relevant": 10,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.178416062146425,
+        "reranking": 1648.0080839246511,
+        "total": 1661.1864999867976
+      }
+    },
+    {
+      "id": "56c073fcef6e394741000020",
+      "question": "What is the association of spermidine with α-synuclein neurotoxicity?",
+      "type": "factoid",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.012667048722506,
+        "reranking": 1618.5536249540746,
+        "total": 1633.5662920027971
+      }
+    },
+    {
+      "id": "5d35eb01b3a638076300000f",
+      "question": "Are there negative enhancers?",
+      "type": "yesno",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.125,
+        "mrr@5": 0.2,
+        "ndcg@5": 0.13120507751234178
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 0.5,
+      "recall@20_reranked": 0.5,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.376958038657904,
+        "reranking": 1590.5524999834597,
+        "total": 1602.9294580221176
+      }
+    },
+    {
+      "id": "5d3802a27bc3fee31f00000e",
+      "question": "How is Slc22a3 imprinted?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.790042139589787,
+        "reranking": 1614.408082794398,
+        "total": 1628.1981249339879
+      }
+    },
+    {
+      "id": "5c5f12d91a4c55d80b000016",
+      "question": "Is chlorotoxin a peptide?",
+      "type": "yesno",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.259666040539742,
+        "reranking": 1620.8846252411604,
+        "total": 1634.1442912817001
+      }
+    },
+    {
+      "id": "533ada5efd9a95ea0d000001",
+      "question": "Is there any evidence of dysregulated long non coding RNAs and Alzheimer's disease?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.2857142857142857,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.3156484524795145
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.283833861351013,
+        "reranking": 1614.3509158864617,
+        "total": 1627.6347497478127
+      }
+    },
+    {
+      "id": "5e44bdba48dab47f2600001c",
+      "question": "Is Selumetinib effective for low-grade glioma?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.530791874974966,
+        "reranking": 1606.3536670990288,
+        "total": 1617.8844589740038
+      }
+    },
+    {
+      "id": "5547d72ef35db75526000008",
+      "question": "Do all archaea possess multiple origins of DNA replication?",
+      "type": "yesno",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8539316501572937
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.018416076898575,
+        "reranking": 1388.341334182769,
+        "total": 1400.3597502596676
+      }
+    },
+    {
+      "id": "5c58b99586df2b9174000012",
+      "question": "Cemiplimab is used for treatment of which cancer?",
+      "type": "factoid",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.879082933068275,
+        "reranking": 1604.145917110145,
+        "total": 1617.0250000432134
+      }
+    },
+    {
+      "id": "551173c26a8cde6b72000004",
+      "question": "Which event results in the acetylation of S6K1?",
+      "type": "summary",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.228875119239092,
+        "reranking": 1633.8659171015024,
+        "total": 1647.0947922207415
+      }
+    },
+    {
+      "id": "5c5249077e3cb0e23100000b",
+      "question": "What is the 3D tomography imaging technique for diagnosis of  eye disease?",
+      "type": "factoid",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.8571428571428571,
+      "recall@20_reranked": 0.8571428571428571,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.566374614834785,
+        "reranking": 1664.1065422445536,
+        "total": 1676.6729168593884
+      }
+    },
+    {
+      "id": "61fa97d7c9dfcb9c09000006",
+      "question": "Should edasalonexent be used for Duchenne muscular dystrophy patients?",
+      "type": "summary",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.442082796245813,
+        "reranking": 1619.5810418576002,
+        "total": 1633.023124653846
+      }
+    },
+    {
+      "id": "58bbb64422d3005309000014",
+      "question": "What is \"Epitranscriptome analysis\"?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 0.5714285714285714,
+      "recall@20_reranked": 0.5714285714285714,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.595708016306162,
+        "reranking": 1637.8728337585926,
+        "total": 1650.4685417748988
+      }
+    },
+    {
+      "id": "622deabc3a8413c6530000a6",
+      "question": "What is the SPRTN protein function?",
+      "type": "factoid",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.34954223036766,
+        "reranking": 1791.1392077803612,
+        "total": 1803.4887500107288
+      }
+    },
+    {
+      "id": "5c58db1386df2b9174000014",
+      "question": "What are the CADD scores?",
+      "type": "summary",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.75369761125927
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.131291907280684,
+        "reranking": 1746.6392912901938,
+        "total": 1758.7705831974745
+      }
+    },
+    {
+      "id": "530cf54dab4de4de0c00000c",
+      "question": "What is the main application of SWATH-MS in proteomics?",
+      "type": "factoid",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8318724637288826
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.838249560445547,
+        "reranking": 1678.6381672136486,
+        "total": 1691.476416774094
+      }
+    },
+    {
+      "id": "5c8c05c70101eac870000001",
+      "question": "Is lactotransferrin a tumour suppressor?",
+      "type": "yesno",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.680583029985428,
+        "reranking": 1651.5933331102133,
+        "total": 1666.2739161401987
+      }
+    },
+    {
+      "id": "606b30e094d57fd87900005f",
+      "question": "What are the phases of hair follicle cycle?",
+      "type": "list",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6992148198508501
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.507874984294176,
+        "reranking": 1681.9412079639733,
+        "total": 1694.4490829482675
+      }
+    },
+    {
+      "id": "56e857ae42442bac75000004",
+      "question": "What is needed for MMP proteins to be functional?",
+      "type": "factoid",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.42857142857142855,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.4912596920895758
+      },
+      "recall@20_baseline": 0.8571428571428571,
+      "recall@20_reranked": 0.8571428571428571,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.64237505570054,
+        "reranking": 1705.9614169411361,
+        "total": 1720.6037919968367
+      }
+    },
+    {
+      "id": "6025ddde1cb411341a0000ba",
+      "question": "Is Tranexamic acid effective for intracerebral haemorrhage?",
+      "type": "yesno",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.453457970172167,
+        "reranking": 1703.0904591083527,
+        "total": 1716.5439170785248
+      }
+    },
+    {
+      "id": "5c7836dad774d04240000002",
+      "question": "Are Mesenchymal stem cells (MSC) multipotent cells?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6934264036172708
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9197207891481876
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.670500203967094,
+        "reranking": 1745.7136660814285,
+        "total": 1758.3841662853956
+      }
+    },
+    {
+      "id": "5e480ccfd14c9f295d000005",
+      "question": "Is g-H2AX a marker for double strand breaks?",
+      "type": "yesno",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.25,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.3903800499921017
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8048099750039491
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.964458040893078,
+        "reranking": 1738.8901668600738,
+        "total": 1750.8546249009669
+      }
+    },
+    {
+      "id": "622669363a8413c653000089",
+      "question": "What is the role of PCAT6 in human cancers?",
+      "type": "summary",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.589209083467722,
+        "reranking": 1634.7911250777543,
+        "total": 1646.380334161222
+      }
+    },
+    {
+      "id": "5fdb43f6a43ad3127800002e",
+      "question": "What are the two types of duplicated genes in the yeast S. cerevisiae?",
+      "type": "list",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.426750268787146,
+        "reranking": 1700.7126659154892,
+        "total": 1713.1394161842763
+      }
+    },
+    {
+      "id": "5cf4dec0a49efeb44c00000c",
+      "question": "Are lamina-associated domains (LADs) associated with transcriptional activation?",
+      "type": "yesno",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9674679834891693
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.50383397564292,
+        "reranking": 1751.734625082463,
+        "total": 1764.238459058106
+      }
+    },
+    {
+      "id": "5544bcde5beec11c10000003",
+      "question": "Are there conserved noncoding elements identified between genomes of human and teleosts?",
+      "type": "yesno",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.375,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6164336326286644
+      },
+      "reranked": {
+        "recall@5": 0.25,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.27727342735504823
+      },
+      "recall@20_baseline": 0.875,
+      "recall@20_reranked": 0.875,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.27716575562954,
+        "reranking": 1692.8659589029849,
+        "total": 1707.1431246586144
+      }
+    },
+    {
+      "id": "5c6da11e7c78d69471000042",
+      "question": "Are there tools for reviewing variant calls?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.668166309595108,
+        "reranking": 1713.9686248265207,
+        "total": 1726.6367911361158
+      }
+    },
+    {
+      "id": "602745c51cb411341a0000de",
+      "question": "Describe the mechanism of action of Lisocabtagene maraleucel.",
+      "type": "summary",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.25,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.5531464700081437
+      },
+      "reranked": {
+        "recall@5": 0.375,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7227265726449519
+      },
+      "recall@20_baseline": 0.375,
+      "recall@20_reranked": 0.375,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 15.5780422501266,
+        "reranking": 1818.2457499206066,
+        "total": 1833.8237921707332
+      }
+    },
+    {
+      "id": "58ea59273e8b6dc87c000012",
+      "question": "List viral vectors used in gene therapy.",
+      "type": "list",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.639945385422766
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.909750152379274,
+        "reranking": 1710.328791756183,
+        "total": 1724.2385419085622
+      }
+    },
+    {
+      "id": "56b739d976d8bf8d13000005",
+      "question": "List available genetic multicolor cell labeling techiniques in Drosophila",
+      "type": "list",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.641292065382004,
+        "reranking": 1743.073749821633,
+        "total": 1755.715041887015
+      }
+    },
+    {
+      "id": "54da21bf4b1fd0d33c00000d",
+      "question": "Describe what is the advantage of using a stain free protein gel in a Western Blot experiment?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.627750031650066,
+        "reranking": 1806.5815828740597,
+        "total": 1821.2093329057097
+      }
+    },
+    {
+      "id": "6032866a1cb411341a000142",
+      "question": "What are commensal bacteria?",
+      "type": "summary",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.3191471544989227
+      },
+      "reranked": {
+        "recall@5": 0.75,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.787702056960637
+      },
+      "recall@20_baseline": 0.75,
+      "recall@20_reranked": 0.75,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.63049989938736,
+        "reranking": 1636.3712502643466,
+        "total": 1649.001750163734
+      }
+    },
+    {
+      "id": "5c72aaed7c78d6947100006f",
+      "question": "Is pazopanib an effective treatment of glioblastoma?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.046457897871733,
+        "reranking": 1625.8690422400832,
+        "total": 1638.915500137955
+      }
+    },
+    {
+      "id": "5ace17c30340b9f058000009",
+      "question": "Which olfactory gene senses androsterone?",
+      "type": "factoid",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "reranked": {
+        "recall@5": 0.4,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.3156484524795145
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.262500055134296,
+        "reranking": 1668.1660409085453,
+        "total": 1681.4285409636796
+      }
+    },
+    {
+      "id": "5148b466d24251bc05000037",
+      "question": "What is the mechanism of action of abiraterone?",
+      "type": "summary",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.3333333333333333,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.27727342735504823
+      },
+      "reranked": {
+        "recall@5": 0.3333333333333333,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.36005461457723403
+      },
+      "recall@20_baseline": 0.5,
+      "recall@20_reranked": 0.5,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.71175017952919,
+        "reranking": 1639.105750247836,
+        "total": 1650.8175004273653
+      }
+    },
+    {
+      "id": "514a2649d24251bc0500005a",
+      "question": "How functional connectivity of the default mode network changes in patients with disorders of consciousness?",
+      "type": "summary",
+      "num_relevant": 10,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.571625109761953,
+        "reranking": 1666.518374811858,
+        "total": 1680.08999992162
+      }
+    },
+    {
+      "id": "515ae990d24251bc050000ad",
+      "question": "Is Rheumatoid Arthritis related to myopathy?",
+      "type": "yesno",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6608397947263839
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.776000425219536,
+        "reranking": 1616.7570827528834,
+        "total": 1629.533083178103
+      }
+    },
+    {
+      "id": "535d69177d100faa09000003",
+      "question": "What is SCENAR therapy used for?",
+      "type": "list",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9828920819566879
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.137792237102985,
+        "reranking": 1695.8530419506133,
+        "total": 1708.9908341877162
+      }
+    },
+    {
+      "id": "5539029cbc4f83e828000012",
+      "question": "Which genes are thought to be involved in medulloblastoma development?",
+      "type": "list",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.625,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.625,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.674541678279638,
+        "reranking": 1674.0013752132654,
+        "total": 1686.675916891545
+      }
+    },
+    {
+      "id": "58da1aa08acda34529000012",
+      "question": "Which protein is associated with hyperemesis gravidarum during pregrancy?",
+      "type": "factoid",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6366824387328317
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6366824387328317
+      },
+      "recall@20_baseline": 0.5,
+      "recall@20_reranked": 0.5,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.320540845394135,
+        "reranking": 1661.5704172290862,
+        "total": 1673.8909580744803
+      }
+    },
+    {
+      "id": "54fc9b236ad7dcbc12000005",
+      "question": "List adenosine A2A receptor antagonists that are used for Parkinson's disease treatment.",
+      "type": "list",
+      "num_relevant": 10,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.689916115254164,
+        "reranking": 1640.6522090546787,
+        "total": 1654.3421251699328
+      }
+    },
+    {
+      "id": "550c1ca3a103b78016000003",
+      "question": "Is selenium deficiency involved in autoimmune thyroid disease?",
+      "type": "yesno",
+      "num_relevant": 10,
+      "baseline": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.919708784669638,
+        "reranking": 1652.2333333268762,
+        "total": 1666.1530421115458
+      }
+    },
+    {
+      "id": "5fdb4176a43ad3127800001a",
+      "question": "What is the difference in the roles of Tcf1 and Tcf3 during development?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.062374968081713,
+        "reranking": 1684.4519581645727,
+        "total": 1696.5143331326544
+      }
+    },
+    {
+      "id": "62007dcec9dfcb9c09000019",
+      "question": "What is the use of the CAHP score?",
+      "type": "summary",
+      "num_relevant": 9,
+      "baseline": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5555555555555556,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.8888888888888888,
+      "recall@20_reranked": 0.8888888888888888,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.946417089551687,
+        "reranking": 1700.9436660446227,
+        "total": 1713.8900831341743
+      }
+    },
+    {
+      "id": "54f48cb74e9bf3263f000001",
+      "question": "What is known about type D personality trait in cancer patients?",
+      "type": "summary",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6608397947263839
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.838666163384914,
+        "reranking": 1709.7367919050157,
+        "total": 1721.5754580684006
+      }
+    },
+    {
+      "id": "622baf3f3a8413c653000099",
+      "question": "Do Afamin bind Vitamin E?",
+      "type": "yesno",
+      "num_relevant": 5,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8687949224876582
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.310707941651344,
+        "reranking": 1659.0627077966928,
+        "total": 1671.3734157383442
+      }
+    },
+    {
+      "id": "56c8318f5795f9a73e00000f",
+      "question": "Can sorafenib activate AMPK?",
+      "type": "yesno",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9674679834891693
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.482166919857264,
+        "reranking": 1622.0160420052707,
+        "total": 1635.498208925128
+      }
+    },
+    {
+      "id": "5ad240f70340b9f058000015",
+      "question": "Is human lysyl oxidase-like 2 a glycoprotein?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.867209199815989,
+        "reranking": 1667.4529579468071,
+        "total": 1681.3201671466231
+      }
+    },
+    {
+      "id": "5a722a052dc08e987e000002",
+      "question": "Is Marfan syndrome associated with chordal rupture?",
+      "type": "yesno",
+      "num_relevant": 8,
+      "baseline": {
+        "recall@5": 0.125,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.16958010263680806
+      },
+      "reranked": {
+        "recall@5": 0.375,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.5147714448836774
+      },
+      "recall@20_baseline": 0.875,
+      "recall@20_reranked": 0.875,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.22208421677351,
+        "reranking": 1697.4569577723742,
+        "total": 1709.6790419891477
+      }
+    },
+    {
+      "id": "5c76e20f7c78d694710000ab",
+      "question": "What is latex bead phagocytosis?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7653606369886217
+      },
+      "reranked": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7039180890341347
+      },
+      "recall@20_baseline": 0.6666666666666666,
+      "recall@20_reranked": 0.6666666666666666,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.51025015860796,
+        "reranking": 1677.1182077936828,
+        "total": 1688.6284579522908
+      }
+    },
+    {
+      "id": "56d34fbcf22319765a000009",
+      "question": "Can chronological age be predicted by measuring telomere length?",
+      "type": "yesno",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.452541083097458,
+        "reranking": 1635.2780419401824,
+        "total": 1648.73058302328
+      }
+    },
+    {
+      "id": "606b3f4d94d57fd879000066",
+      "question": "What is the proteoglycan Tsukushi?",
+      "type": "summary",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 0.3333333333333333,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.46927872602275644
+      },
+      "reranked": {
+        "recall@5": 0.3333333333333333,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.46927872602275644
+      },
+      "recall@20_baseline": 0.3333333333333333,
+      "recall@20_reranked": 0.3333333333333333,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.212207868695259,
+        "reranking": 1650.9089167229831,
+        "total": 1665.1211245916784
+      }
+    },
+    {
+      "id": "55414a763f2354b713000003",
+      "question": "Which databases exist for experimentally determined topologies of α-helical transmembrane proteins ?",
+      "type": "list",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 14.23237519338727,
+        "reranking": 1615.9452078863978,
+        "total": 1630.177583079785
+      }
+    },
+    {
+      "id": "5516fc8832767d0305000002",
+      "question": "Is Dicer part of the RISC loading complex?",
+      "type": "yesno",
+      "num_relevant": 6,
+      "baseline": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.8333333333333334,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.764999944716692,
+        "reranking": 1692.198249977082,
+        "total": 1703.9632499217987
+      }
+    },
+    {
+      "id": "5717bacacb4ef8864c00000d",
+      "question": "Can the apoptosis regulator BAX trigger the release of cytochrome c?",
+      "type": "yesno",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.5714285714285714,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8539316501572937
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 0.8571428571428571,
+      "recall@20_reranked": 0.8571428571428571,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.477709144353867,
+        "reranking": 1659.3473749235272,
+        "total": 1672.825084067881
+      }
+    },
+    {
+      "id": "5c76d0417c78d694710000a8",
+      "question": "What is the cause if the rare disease cystinosis?",
+      "type": "factoid",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.285582885146141,
+        "reranking": 1620.7069172523916,
+        "total": 1633.9925001375377
+      }
+    },
+    {
+      "id": "515a7ffdd24251bc050000a5",
+      "question": "What are the effects of depleting protein  km23-1 (DYNLRB1)  in a cell?",
+      "type": "list",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.460249941796064,
+        "reranking": 1580.0374592654407,
+        "total": 1592.4977092072368
+      }
+    },
+    {
+      "id": "622b95dc3a8413c653000092",
+      "question": "Is retinol binding protein 4 an adipokine?",
+      "type": "yesno",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.79179223254323,
+        "reranking": 1589.1172918491066,
+        "total": 1600.9090840816498
+      }
+    },
+    {
+      "id": "54297ed2289fd6cb07000001",
+      "question": "Can siRNA affect response to afatinib treatment?",
+      "type": "yesno",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7653606369886217
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.194249778985977,
+        "reranking": 1644.8101671412587,
+        "total": 1657.0044169202447
+      }
+    },
+    {
+      "id": "5c6b15467c78d69471000024",
+      "question": "Mention computational tools that have been developed for alternative polyadenylation (APA) sites analysis",
+      "type": "list",
+      "num_relevant": 4,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.969875078648329,
+        "reranking": 1780.6104999035597,
+        "total": 1792.580374982208
+      }
+    },
+    {
+      "id": "5e5d27531af46fc130000007",
+      "question": "Has the Spanich flu virus been reconstructed?",
+      "type": "yesno",
+      "num_relevant": 3,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 12.724667321890593,
+        "reranking": 1693.0281249806285,
+        "total": 1705.752792302519
+      }
+    },
+    {
+      "id": "518ba4b5310faafe08000005",
+      "question": "Which drugs are utilized to treat eosinophilic esophagitis?",
+      "type": "list",
+      "num_relevant": 7,
+      "baseline": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 0.7142857142857143,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 13.165874872356653,
+        "reranking": 1614.7977919317782,
+        "total": 1627.9636668041348
+      }
+    },
+    {
+      "id": "58dff3f06fddd3e83e000007",
+      "question": "What is the Genome 10K Project?",
+      "type": "summary",
+      "num_relevant": 2,
+      "baseline": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "reranked": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      },
+      "recall@20_baseline": 1.0,
+      "recall@20_reranked": 1.0,
+      "same_candidates": true,
+      "latency_ms": {
+        "retrieval": 11.533624958246946,
+        "reranking": 1585.512625053525,
+        "total": 1597.046250011772
+      }
+    }
+  ]
+}

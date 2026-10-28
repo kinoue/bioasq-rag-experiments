@@ -1,0 +1,25 @@
+{
+  "dataset": "BioASQ Task 11b training set (training11b.json)",
+  "dataset_license": "CC BY 2.5 (BioASQ); abstracts from PubMed/NCBI",
+  "dataset_source": "https://huggingface.co/datasets/rag-datasets/rag-mini-bioasq/resolve/224a87f64a5c3a720b5bc627cf760f543b2f1e79/raw_data/training11b.json",
+  "dataset_sha256": "6df656862ca860efc355c7805d07ddca700d64ecc3785c519a49afccaaeeac98",
+  "bioasq_questions_total": 4719,
+  "seed": 13,
+  "selection": "2-10 relevant documents per question",
+  "distractors": "relevant documents of other, randomly sampled BioASQ 11b questions (not judged for the evaluation questions)",
+  "pubmed_fetched": "2026-10-28T12:15:20+00:00",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "num_questions": 100,
+  "question_types": {
+    "factoid": 20,
+    "list": 19,
+    "yesno": 29,
+    "summary": 32
+  },
+  "corpus_size": 2500,
+  "num_positive_docs": 522,
+  "num_distractor_docs": 1978,
+  "relevant_per_question_mean": 5.22,
+  "pubmed_records_requested": 2775,
+  "pubmed_records_without_abstract_or_missing": 14
+}
