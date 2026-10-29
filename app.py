@@ -10,6 +10,7 @@ import pandas as pd
 import streamlit as st
 
 from analysis import RESULTS_PATH as RERANKER_COMPARISON_PATH
+from bi_encoder_grid import RESULTS_PATH as GRID_PATH
 from data import (
     BENCHMARK_PATH,
     load_corpus,
@@ -490,6 +491,212 @@ def reranker_comparison_section():
         )
 
 
+
+# ------------------------------------------------- bi-encoder × reranker ---
+
+NO_RERANKER = "No reranker"
+
+
+def format_p(p):
+    if p < 0.001:
+        return "<0.001"
+    return f"{p:.3f}" if p < 0.01 else f"{p:.2f}"
+
+
+def bi_encoder_frame(grid):
+    alone = {g["bi_encoder"]: g for g in grid["grid"] if g["reranker"] == "none"}
+    rows = []
+    for label, info in grid["bi_encoders"].items():
+        vs = alone[label]["vs_reference"]
+        rows.append({
+            "Bi-encoder": label,
+            "Model": info["model"],
+            "Params (M)": info["params"] / 1e6,
+            "Dim": info["dim"],
+            "nDCG@5": alone[label]["metrics"]["ndcg@5"],
+            "Δ vs app baseline": vs and vs["delta_ndcg@5"],
+            "95% CI": vs and f"[{vs['ci95'][0]:+.3f}, {vs['ci95'][1]:+.3f}]",
+            "p": vs and format_p(vs["wilcoxon_p"]),
+            "Recall@20": info["recall@20"],
+            "Best possible nDCG@5": info["oracle_ndcg@5"],
+            "Query ms": info["query_latency_ms"]["median"],
+            "Index s": info["corpus_embed_seconds"],
+        })
+    return pd.DataFrame(rows)
+
+
+def pipelines_frame(grid):
+    rows = []
+    for g in grid["grid"]:
+        ref, gain = g["vs_reference"], g["vs_same_bi_encoder"]
+        rows.append({
+            "Bi-encoder": g["bi_encoder"],
+            "Reranker": NO_RERANKER if g["reranker"] == "none" else g["reranker"],
+            "nDCG@5": g["metrics"]["ndcg@5"],
+            "MRR@5": g["metrics"]["mrr@5"],
+            "Recall@5": g["metrics"]["recall@5"],
+            "Δ vs app baseline": ref and ref["delta_ndcg@5"],
+            "95% CI": ref and f"[{ref['ci95'][0]:+.3f}, {ref['ci95'][1]:+.3f}]",
+            "p": ref and format_p(ref["wilcoxon_p"]),
+            "Gain from reranking": gain and gain["delta_ndcg@5"],
+            "Gain p": gain and format_p(gain["wilcoxon_p"]),
+        })
+    return pd.DataFrame(rows).sort_values("nDCG@5", ascending=False, kind="stable")
+
+
+def grid_heatmap(grid, view):
+    bi_order = list(grid["bi_encoders"])
+    rr_order = [NO_RERANKER, *grid["rerankers"]]
+    rows = []
+    for g in grid["grid"]:
+        gain = g["vs_same_bi_encoder"]
+        if view == "Gain from reranking":
+            if gain is None:
+                continue
+            value = gain["delta_ndcg@5"]
+        else:
+            value = g["metrics"][view.lower()]
+        rows.append({
+            "bi": g["bi_encoder"],
+            "rr": NO_RERANKER if g["reranker"] == "none" else g["reranker"],
+            "value": value,
+            "reference": (g["bi_encoder"], g["reranker"]) == (
+                grid["reference"]["bi_encoder"], grid["reference"]["reranker"]),
+            "ndcg": g["metrics"]["ndcg@5"],
+            "gain": gain["delta_ndcg@5"] if gain else None,
+            "gain_p": format_p(gain["wilcoxon_p"]) if gain else "—",
+        })
+    df = pd.DataFrame(rows)
+    if view == "Gain from reranking":
+        bound = max(abs(df["value"].min()), abs(df["value"].max()))
+        scale = alt.Scale(scheme="redblue", domain=[-bound, 0, bound])
+        rr_order = rr_order[1:]
+        fmt, title = "+.3f", "nDCG@5 gain from reranking"
+    else:
+        scale = alt.Scale(scheme="blues", domain=[df["value"].min(), df["value"].max()])
+        fmt, title = ".3f", view
+    x = alt.X("rr:N", sort=rr_order, title="Reranker", axis=alt.Axis(labelAngle=0, orient="top"))
+    y = alt.Y("bi:N", sort=bi_order, title="Bi-encoder (first stage)",
+              axis=alt.Axis(labelLimit=200))
+    tooltip = [alt.Tooltip("bi:N", title="Bi-encoder"), alt.Tooltip("rr:N", title="Reranker"),
+               alt.Tooltip("ndcg:Q", format=".3f", title="nDCG@5"),
+               alt.Tooltip("gain:Q", format="+.3f", title="Gain from reranking"),
+               alt.Tooltip("gain_p:N", title="Gain p (Wilcoxon)")]
+    cells = alt.Chart(df).mark_rect(stroke="white", strokeWidth=2).encode(
+        x=x, y=y, color=alt.Color("value:Q", scale=scale, title=title,
+                                  legend=alt.Legend(orient="bottom", gradientLength=300)),
+        tooltip=tooltip)
+    # Dark text on light cells, white text on saturated ones.
+    if view == "Gain from reranking":
+        dark_text = (alt.datum.value > -0.5 * bound) & (alt.datum.value < 0.5 * bound)
+    else:
+        dark_text = alt.datum.value < (df["value"].min() + df["value"].max()) / 2
+    labels = alt.Chart(df).mark_text(fontSize=13).encode(
+        x=x, y=y, text=alt.Text("value:Q", format=fmt), tooltip=tooltip,
+        color=alt.condition(dark_text, alt.value("#1a1a19"), alt.value("#ffffff")))
+    outline = alt.Chart(df[df["reference"]]).mark_rect(
+        fill=None, stroke=RERANKED_COLOR, strokeWidth=3).encode(x=x, y=y)
+    return (cells + labels + outline).properties(height=60 * len(bi_order))
+
+
+def grid_takeaways(grid):
+    entries = grid["grid"]
+    best = max(entries, key=lambda g: g["metrics"]["ndcg@5"])
+    alone = [g for g in entries if g["reranker"] == "none"]
+    best_alone = max(alone, key=lambda g: g["metrics"]["ndcg@5"])
+    app_pipeline = next(g for g in entries if g["bi_encoder"] == grid["reference"]["bi_encoder"]
+                        and g["reranker"] == "bge-reranker-base")
+    ref_ndcg = next(g for g in alone if g["bi_encoder"] == grid["reference"]["bi_encoder"])
+
+    def pipe(g):
+        rr = "no reranker" if g["reranker"] == "none" else g["reranker"]
+        return f"**{g['bi_encoder']} + {rr}**"
+
+    def delta(g):
+        vs = g["vs_reference"]
+        return (f"{vs['delta_ndcg@5']:+.3f} vs. the app's baseline, 95% CI "
+                f"[{vs['ci95'][0]:+.3f}, {vs['ci95'][1]:+.3f}], p {format_p(vs['wilcoxon_p'])}")
+
+    n_tests = len(entries) - 1
+    gains = [g for g in entries if g["vs_same_bi_encoder"]]
+    by_reranker = {}
+    for g in gains:
+        by_reranker.setdefault(g["reranker"], []).append(g["vs_same_bi_encoder"]["delta_ndcg@5"])
+    gain_lines = ", ".join(f"{rr} {min(v):+.3f} to {max(v):+.3f}" for rr, v in by_reranker.items())
+    return "\n".join([
+        f"- **Best pipeline:** {pipe(best)} at nDCG@5 {best['metrics']['ndcg@5']:.3f} "
+        f"({delta(best)}).",
+        f"- **Best bi-encoder alone:** {pipe(best_alone)} at "
+        f"{best_alone['metrics']['ndcg@5']:.3f} ({delta(best_alone)}). For comparison, the app's "
+        f"two-stage pipeline (bge-small + bge-reranker-base) scores "
+        f"{app_pipeline['metrics']['ndcg@5']:.3f} and the app's baseline "
+        f"{ref_ndcg['metrics']['ndcg@5']:.3f}.",
+        f"- **Gain from reranking depends on the first stage** (range across bi-encoders): "
+        f"{gain_lines}. Switch the view to *Gain from reranking* to see it per cell.",
+        f"- **Many comparisons:** this page makes {n_tests} comparisons against one baseline. "
+        f"At p < 0.05, one or two could look significant by chance; trust consistent patterns "
+        f"over single cells.",
+    ])
+
+
+def grid_tab():
+    if not GRID_PATH.exists():
+        st.info("Run `LAB_DEVICE=mps python bi_encoder_grid.py` to build this comparison.")
+        return
+    grid = json.loads(GRID_PATH.read_text())
+    hw = grid["hardware"]
+    st.caption(
+        f"Precomputed by `bi_encoder_grid.py` on {grid['created'][:10]} · "
+        f"{grid['num_questions']} questions · {hw['device'].upper()} ({hw.get('cpu', '')}). "
+        f"Unlike the Benchmark tab, each bi-encoder retrieves its **own** top "
+        f"{grid['candidates']}, so a pipeline can win by finding better candidates, by "
+        f"ordering them better, or both. All differences are paired against the app's "
+        f"baseline: **bge-small, no reranker**."
+    )
+
+    st.subheader("1. Each bi-encoder on its own")
+    st.caption(f"**Recall@{grid['candidates']}** is the share of relevant documents in the "
+               f"bi-encoder's {grid['candidates']} candidates: the most any reranker can work "
+               f"with. **Best possible nDCG@5** is a perfect reordering of those candidates. "
+               f"Query latency includes embedding the question and searching; index time is "
+               f"embedding all {load_metadata()['corpus_size']:,} abstracts.")
+    st.dataframe(bi_encoder_frame(grid), hide_index=True, placeholder="—", column_config={
+        "Model": st.column_config.TextColumn(width="small"),
+        "Params (M)": st.column_config.NumberColumn(format="%.0f"),
+        "Best possible nDCG@5": st.column_config.NumberColumn("Best possible", format="%.3f"),
+        **{c: st.column_config.NumberColumn(format="%.3f") for c in ("nDCG@5", "Recall@20")},
+        "Δ vs app baseline": st.column_config.NumberColumn(format="%+.3f"),
+        "Query ms": st.column_config.NumberColumn(format="%.1f"),
+        "Index s": st.column_config.NumberColumn(format="%.0f"),
+    })
+
+    st.subheader("2. Every bi-encoder × every reranker")
+    view = st.radio("Cell value", ["nDCG@5", "MRR@5", "Recall@5", "Gain from reranking"],
+                    horizontal=True, key="grid_view")
+    left, right = st.columns([3, 2])
+    with left:
+        st.altair_chart(grid_heatmap(grid, view), use_container_width=True)
+        st.caption("Rows: first-stage bi-encoder. Columns: reranker applied to that "
+                   "bi-encoder's own top 20. :orange[Outlined]: the app's baseline. "
+                   "Hover a cell for the reranking gain and its p-value.")
+    with right:
+        st.markdown(grid_takeaways(grid))
+        st.markdown(
+            "- **Caveats:** MedCPT was trained on PubMed search clicks, and BioASQ experts "
+            "found their documents through PubMed search, which may favour it. Latency was "
+            "measured on the device above, not the app's CPU setting."
+        )
+
+    st.subheader(f"All {len(grid['grid'])} pipelines")
+    st.dataframe(pipelines_frame(grid), hide_index=True, placeholder="—", column_config={
+        **{c: st.column_config.NumberColumn(format="%.3f")
+           for c in ("nDCG@5", "MRR@5", "Recall@5")},
+        "Δ vs app baseline": st.column_config.NumberColumn(format="%+.3f"),
+        "Gain from reranking": st.column_config.NumberColumn(
+            format="%+.3f", help="nDCG@5 change from adding this reranker to the same bi-encoder"),
+    })
+
+
 # ------------------------------------------------------------ details ---
 
 
@@ -590,8 +797,8 @@ st.caption(
     f"cross-encoder (`{RERANKER_MODEL}`) on BioASQ questions. Educational experiment over a "
     f"small curated corpus with incomplete relevance labels — not full PubMed search."
 )
-tab_explorer, tab_bench, tab_details = st.tabs(
-    ["Query Explorer", "Benchmark Results", "Experiment Details"],
+tab_explorer, tab_bench, tab_grid, tab_details = st.tabs(
+    ["Query Explorer", "Benchmark Results", "Bi-encoder × Reranker", "Experiment Details"],
     key="active_tab", on_change="rerun",
 )
 with tab_explorer:
@@ -599,5 +806,7 @@ with tab_explorer:
 with tab_bench:
     benchmark_tab()
     reranker_comparison_section()
+with tab_grid:
+    grid_tab()
 with tab_details:
     details_tab()

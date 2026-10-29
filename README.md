@@ -136,6 +136,62 @@ The app still uses `bge-reranker-base`. To try another model, change `RERANKER_M
 `reranker.py` (one line), then re-run `python evaluation.py` to refresh the benchmark
 results.
 
+## Comparing bi-encoders too (bi-encoder × reranker grid)
+
+The comparison above changes only the reranker. To be fair to the first stage as well,
+`bi_encoder_grid.py` swaps the bi-encoder. Each bi-encoder retrieves its **own** top 20,
+so a pipeline can win by finding better candidates, by ordering them better, or both.
+Every bi-encoder is run alone and with each of the four rerankers (35 pipelines). All
+differences are paired against the app's baseline, `bge-small-en-v1.5` alone. Results
+are in `data/bi_encoder_grid.json` and the app's **Bi-encoder × Reranker** tab.
+
+Bi-encoders, chosen to mirror the rerankers' families plus two biomedical models:
+
+| Bi-encoder | Params | nDCG@5 alone | Δ vs app baseline (95% CI) | Recall@20 |
+|---|---:|---:|---|---:|
+| `BAAI/bge-small-en-v1.5` (app) | 33M | 0.871 | — | 0.921 |
+| `BAAI/bge-base-en-v1.5` | 109M | 0.900 | +0.030 [+0.007, +0.054] | 0.940 |
+| `ncbi/MedCPT-Query-Encoder` + `-Article-Encoder` | 219M | **0.908** | +0.038 [+0.007, +0.071] | **0.990** |
+| `sentence-transformers/msmarco-MiniLM-L6-cos-v5` | 23M | 0.737 | −0.133 [−0.179, −0.089] | 0.755 |
+| `mixedbread-ai/mxbai-embed-xsmall-v1` | 24M | 0.836 | −0.035 [−0.065, −0.006] | 0.901 |
+| `abhinand/MedEmbed-small-v0.1` | 33M | 0.861 | −0.010 [−0.026, +0.005] | 0.914 |
+| `NeuML/pubmedbert-base-embeddings` | 109M | 0.773 | −0.097 [−0.136, −0.062] | 0.846 |
+
+nDCG@5 for every combination:
+
+| Bi-encoder \ reranker | none | bge-reranker-base | MedCPT | MiniLM-L6 | mxbai-rerank-base |
+|---|---:|---:|---:|---:|---:|
+| bge-small (app) | 0.871 | 0.875 | 0.931 | 0.936 | 0.913 |
+| bge-base | 0.900 | 0.868 | 0.940 | 0.942 | 0.911 |
+| MedCPT | 0.908 | 0.900 | **0.961** | 0.959 | 0.932 |
+| MiniLM-L6 (MS MARCO) | 0.737 | 0.810 | 0.839 | 0.844 | 0.835 |
+| mxbai-embed-xsmall | 0.836 | 0.863 | 0.923 | 0.934 | 0.906 |
+| MedEmbed-small | 0.861 | 0.877 | 0.930 | 0.934 | 0.911 |
+| PubMedBERT (NeuML) | 0.773 | 0.840 | 0.892 | 0.890 | 0.873 |
+
+What this adds:
+
+- **A better first stage alone beats the app's two-stage pipeline.** MedCPT's bi-encoder
+  scores 0.908 with no reranker, above `bge-small + bge-reranker-base` (0.875), at the
+  same query latency. Its candidates contain 99% of the relevant documents.
+- **The best pipeline is MedCPT + MedCPT** (0.961, +0.090 vs. the app's baseline,
+  95% CI [+0.054, +0.131]). That equals the best possible score from reordering
+  `bge-small`'s candidates, and it gets there because MedCPT's candidates are better.
+- **Reranking helps weak first stages most, but can't rescue them.** The MS MARCO MiniLM
+  and PubMedBERT bi-encoders gain about +0.10–0.12 from MedCPT or MiniLM reranking,
+  yet still finish below `bge-small` + the same reranker, because their 20 candidates miss
+  more relevant documents (Recall@20 0.755 and 0.846).
+- **`bge-reranker-base` is the weak reranker with every bi-encoder.** It slightly hurts the
+  two strongest first stages (−0.033 after bge-base, −0.009 after MedCPT, neither
+  significant).
+- **Domain fine-tuning alone was not enough.** MedEmbed-small, `bge-small` fine-tuned on
+  clinical text, did not beat `bge-small` (−0.010, n.s.).
+
+Caveats: 34 comparisons against one baseline means one or two could look significant by
+chance at p < 0.05. MedCPT was trained on PubMed search clicks, and BioASQ experts found
+their documents through PubMed search, which may favour it. The grid ran on the Apple GPU
+(`LAB_DEVICE=mps`); bi-encoder query latencies there were 5–9 ms for every model.
+
 ## How bi-encoders and cross-encoders differ
 
 A **bi-encoder** (`BAAI/bge-small-en-v1.5`, 33M parameters) maps the question and each
@@ -168,6 +224,7 @@ starts immediately. To rebuild or re-run everything:
 python prepare_data.py   # download BioASQ, fetch abstracts from PubMed, embed (~2 min)
 python evaluation.py     # benchmark both pipelines on all questions (~3 min on CPU)
 python analysis.py       # compare four rerankers on the same candidates (downloads ~1.3 GB more)
+LAB_DEVICE=mps python bi_encoder_grid.py  # 7 bi-encoders × 5 reranker settings (~25 min on MPS)
 pytest                   # metric unit tests
 ```
 
@@ -242,11 +299,12 @@ We report median, mean and p90.
 
 | File | Purpose |
 |---|---|
-| `app.py` | Streamlit UI: Query Explorer, Benchmark Results, Experiment Details |
+| `app.py` | Streamlit UI: Query Explorer, Benchmark Results, Bi-encoder × Reranker, Experiment Details |
 | `data.py` | File paths and loaders for questions, corpus, embeddings |
 | `retrieval.py` | Bi-encoder model, query embedding, dot-product search |
 | `reranker.py` | Cross-encoder scoring and reranking of a fixed candidate list |
 | `evaluation.py` | Metrics, timed pipeline comparison, benchmark CLI |
 | `analysis.py` | Follow-up: four rerankers on the same candidates, with significance tests |
+| `bi_encoder_grid.py` | Follow-up: seven bi-encoders × five reranker settings |
 | `prepare_data.py` | Dataset download, corpus construction, PubMed fetch, embeddings |
 | `tests/test_evaluation.py` | Unit tests for metrics and search |
