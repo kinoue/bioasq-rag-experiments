@@ -1,0 +1,100 @@
+{
+  "num_questions": 100,
+  "candidates": 20,
+  "top_k": 5,
+  "bootstrap_samples": 10000,
+  "models": {
+    "bi-encoder": "BAAI/bge-small-en-v1.5",
+    "bge-reranker-base": "BAAI/bge-reranker-base",
+    "MedCPT": "ncbi/MedCPT-Cross-Encoder",
+    "MiniLM-L6 (MS MARCO)": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "mxbai-rerank-base": "mixedbread-ai/mxbai-rerank-base-v1"
+  },
+  "oracle_ndcg@5": 0.9605255135802818,
+  "questions_already_at_oracle": 71,
+  "pipelines": {
+    "bi-encoder": {
+      "metrics": {
+        "recall@5": 0.7276547619047617,
+        "mrr@5": 0.9428333333333333,
+        "ndcg@5": 0.8706571206235424
+      }
+    },
+    "bge-reranker-base": {
+      "metrics": {
+        "recall@5": 0.7316428571428569,
+        "mrr@5": 0.9491666666666666,
+        "ndcg@5": 0.8753356822724431
+      },
+      "vs_bi_encoder": {
+        "delta_ndcg@5": 0.00467856164890065,
+        "ci95": [
+          -0.03724605043778619,
+          0.04664074540539822
+        ],
+        "wilcoxon_p": 0.81698711360774,
+        "improved": 24,
+        "degraded": 18,
+        "sd": 0.21588050701609438,
+        "mde_80pct_power": 0.06044654196450642
+      }
+    },
+    "MedCPT": {
+      "metrics": {
+        "recall@5": 0.7777460317460317,
+        "mrr@5": 0.985,
+        "ndcg@5": 0.9312969130747052
+      },
+      "vs_bi_encoder": {
+        "delta_ndcg@5": 0.0606397924511629,
+        "ci95": [
+          0.03267924078418676,
+          0.09186522629875356
+        ],
+        "wilcoxon_p": 6.034876951332682e-05,
+        "improved": 27,
+        "degraded": 4,
+        "sd": 0.1544572335604024,
+        "mde_80pct_power": 0.043248025396912665
+      }
+    },
+    "MiniLM-L6 (MS MARCO)": {
+      "metrics": {
+        "recall@5": 0.7796309523809523,
+        "mrr@5": 0.9925,
+        "ndcg@5": 0.9357998926787121
+      },
+      "vs_bi_encoder": {
+        "delta_ndcg@5": 0.06514277205516969,
+        "ci95": [
+          0.032017644864328246,
+          0.1024953346064125
+        ],
+        "wilcoxon_p": 0.00045624243362050077,
+        "improved": 24,
+        "degraded": 5,
+        "sd": 0.18107112387758115,
+        "mde_80pct_power": 0.05069991468572271
+      }
+    },
+    "mxbai-rerank-base": {
+      "metrics": {
+        "recall@5": 0.7582936507936507,
+        "mrr@5": 0.98,
+        "ndcg@5": 0.9132542817901972
+      },
+      "vs_bi_encoder": {
+        "delta_ndcg@5": 0.04259716116665472,
+        "ci95": [
+          0.006454343175274716,
+          0.0821332862304938
+        ],
+        "wilcoxon_p": 0.060872208826137586,
+        "improved": 24,
+        "degraded": 12,
+        "sd": 0.1939325582749603,
+        "mde_80pct_power": 0.05430111631698888
+      }
+    }
+  }
+}

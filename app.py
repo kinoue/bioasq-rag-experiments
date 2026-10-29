@@ -9,6 +9,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from analysis import RESULTS_PATH as RERANKER_COMPARISON_PATH
 from data import (
     BENCHMARK_PATH,
     load_corpus,
@@ -397,6 +398,98 @@ def benchmark_tab():
     )
 
 
+def reranker_comparison_frame(comp):
+    rows = []
+    for name, p in comp["pipelines"].items():
+        m, vs = p["metrics"], p.get("vs_bi_encoder")
+        rows.append({
+            "Pipeline": "Bi-encoder only" if vs is None else f"+ {name}",
+            "nDCG@5": m["ndcg@5"], "MRR@5": m["mrr@5"], "Recall@5": m["recall@5"],
+            "ΔnDCG@5": vs and vs["delta_ndcg@5"],
+            "95% CI": vs and f"[{vs['ci95'][0]:+.3f}, {vs['ci95'][1]:+.3f}]",
+            "Wilcoxon p": vs and ("<0.001" if vs["wilcoxon_p"] < 0.001 else f"{vs['wilcoxon_p']:.2f}"),
+            "Improved / degraded": vs and f"{vs['improved']} / {vs['degraded']}",
+        })
+    return pd.DataFrame(rows)
+
+
+def delta_ci_chart(comp, mde):
+    """ΔnDCG@5 per reranker with its 95% CI; the shaded band is what n can't resolve."""
+    df = pd.DataFrame([
+        {"reranker": name, "delta": vs["delta_ndcg@5"], "lo": vs["ci95"][0], "hi": vs["ci95"][1],
+         "p": vs["wilcoxon_p"], "ours": name == "bge-reranker-base"}
+        for name, p in comp["pipelines"].items() if (vs := p.get("vs_bi_encoder"))
+    ])
+    y = alt.Y("reranker:N", title=None, sort=alt.EncodingSortField("delta", order="descending"),
+              axis=alt.Axis(labelLimit=200))
+    band = alt.Chart(pd.DataFrame({"lo": [-mde], "hi": [mde]})).mark_rect(
+        color=UNLABELED_COLOR, opacity=0.18).encode(x="lo:Q", x2="hi:Q")
+    zero = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(color=UNLABELED_COLOR).encode(x="x:Q")
+    tooltip = ["reranker:N", alt.Tooltip("delta:Q", format="+.3f", title="ΔnDCG@5"),
+               alt.Tooltip("lo:Q", format="+.3f", title="CI low"),
+               alt.Tooltip("hi:Q", format="+.3f", title="CI high"),
+               alt.Tooltip("p:Q", format=".3g", title="Wilcoxon p")]
+    whiskers = alt.Chart(df).mark_rule(strokeWidth=2).encode(
+        y=y, x=alt.X("lo:Q", title="ΔnDCG@5 vs. bi-encoder (95% CI)"), x2="hi:Q",
+        color=alt.condition("datum.ours", alt.value(RERANKED_COLOR), alt.value(BASELINE_COLOR)),
+        tooltip=tooltip)
+    dots = alt.Chart(df).mark_circle(size=110, opacity=1).encode(
+        y=y, x="delta:Q", tooltip=tooltip,
+        color=alt.condition("datum.ours", alt.value(RERANKED_COLOR), alt.value(BASELINE_COLOR)))
+    return (band + zero + whiskers + dots).properties(height=220)
+
+
+def reranker_comparison_section():
+    st.divider()
+    st.subheader("Follow-up: is it the reranker or the sample size?")
+    if not RERANKER_COMPARISON_PATH.exists():
+        st.info("Run `python analysis.py` to compare several rerankers on the same candidates.")
+        return
+    comp = json.loads(RERANKER_COMPARISON_PATH.read_text())
+    bge = comp["pipelines"]["bge-reranker-base"]["vs_bi_encoder"]
+    bi_ndcg = comp["pipelines"]["bi-encoder"]["metrics"]["ndcg@5"]
+    st.caption(
+        f"Precomputed by `python analysis.py` (not re-run by the button above). Four "
+        f"cross-encoders reorder the *same* bi-encoder top {comp['candidates']} for "
+        f"{comp['num_questions']} questions. CIs use {comp['bootstrap_samples']:,} bootstrap "
+        f"resamples of the questions."
+    )
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Smallest detectable ΔnDCG@5", f"≈ {bge['mde_80pct_power']:.2f}",
+              help="Mean change detectable with 80% power at α = 0.05 for "
+                   "bge-reranker-base's spread of per-question changes: 2.8·sd/√n")
+    c2.metric("Best possible reordering of the 20", f"{comp['oracle_ndcg@5']:.3f}",
+              delta=f"{comp['oracle_ndcg@5'] - bi_ndcg:+.3f} headroom over bi-encoder",
+              delta_color="off")
+    c3.metric("Questions already at that ceiling",
+              f"{comp['questions_already_at_oracle']} / {comp['num_questions']}",
+              help="Bi-encoder top 5 is already the best ordering of its 20 candidates; "
+                   "a reranker can only make these worse")
+
+    st.dataframe(reranker_comparison_frame(comp), hide_index=True, placeholder="—", column_config={
+        **{c: st.column_config.NumberColumn(format="%.3f") for c in ("nDCG@5", "MRR@5", "Recall@5")},
+        "ΔnDCG@5": st.column_config.NumberColumn(format="%+.3f"),
+    })
+
+    left, right = st.columns([3, 2])
+    with left:
+        st.altair_chart(delta_ci_chart(comp, bge["mde_80pct_power"]), use_container_width=True)
+        st.caption(":orange[●] the app's reranker · :blue[●] alternatives · shaded band: "
+                   "changes smaller than ±MDE that 100 questions cannot reliably detect.")
+    with right:
+        st.markdown(
+            "- **100 questions is enough to see a real gain.** Two rerankers improve nDCG@5 by "
+            "about +0.06 with p < 0.001 on the same candidates and labels.\n"
+            "- **The app's reranker is the weak link.** `bge-reranker-base` helps and hurts about "
+            f"equally often ({bge['improved']} vs. {bge['degraded']} questions); its scores match "
+            "a raw `transformers` run, so this is the model, not a bug.\n"
+            "- **Headroom is limited on this corpus.** The bi-encoder is often already optimal, so "
+            "even a good reranker can only add a few points.\n"
+            "- Switching rerankers is a one-line change to `RERANKER_MODEL` in `reranker.py`."
+        )
+
+
 # ------------------------------------------------------------ details ---
 
 
@@ -505,5 +598,6 @@ with tab_explorer:
     explorer_tab()
 with tab_bench:
     benchmark_tab()
+    reranker_comparison_section()
 with tab_details:
     details_tab()

@@ -32,9 +32,11 @@ and **degraded** it on 18. On the Apple GPU (`LAB_DEVICE=mps`), reranking took a
 
 ### What I learned
 
-1. **On average, reranking barely helped here.** The bi-encoder already puts a known
-   relevant document first for most questions (MRR@5 = 0.943), so there is little room to
-   improve. A +0.005 nDCG@5 gain on 100 questions is within noise.
+1. **This reranker barely helped here, but reranking in general does.** The +0.005
+   nDCG@5 gain from `bge-reranker-base` is within noise. Two other cross-encoders, scoring
+   the *same* 20 candidates, gained about +0.06 with clear statistical significance. The
+   choice of reranker mattered more than the decision to rerank. See the
+   [follow-up analysis](#why-reranking-barely-helped-follow-up-analysis).
 2. **The average hides large swings in both directions.** Individual questions moved by
    between −0.68 and +0.83 nDCG@5. Reranking is not a uniform improvement.
 3. **The cross-encoder fixes "keyword-similar but off-topic" errors.** It reads the
@@ -74,6 +76,66 @@ Where reranking **hurt**:
 
 Select any question in the app's **Benchmark Results** table to see these rankings.
 
+## Why reranking barely helped (follow-up analysis)
+
+`python analysis.py` takes the bi-encoder's top 20 for each question once, then reorders
+those same candidates with four different cross-encoders. Every model reads at most 512
+tokens of `title + "\n" + abstract`. For each reranker it reports the paired change in
+nDCG@5 against the bi-encoder:
+
+- a 95% bootstrap confidence interval (10,000 resamples of the 100 questions);
+- a Wilcoxon signed-rank p-value (on questions whose score changed);
+- how many questions improved or got worse.
+
+Results are saved to `data/reranker_comparison.json`.
+
+Same 2,500-abstract corpus and 100 questions as above:
+
+| Pipeline | nDCG@5 | MRR@5 | Recall@5 | ΔnDCG@5 | 95% CI | Wilcoxon p | Improved / degraded |
+|---|---:|---:|---:|---:|---|---:|---:|
+| Bi-encoder only | 0.871 | 0.943 | 0.728 | | | | |
+| + `BAAI/bge-reranker-base` (default) | 0.875 | 0.949 | 0.732 | +0.005 | [−0.037, +0.047] | 0.82 | 24 / 18 |
+| + `ncbi/MedCPT-Cross-Encoder` | 0.931 | 0.985 | 0.778 | +0.061 | [+0.033, +0.092] | <0.001 | 27 / 4 |
+| + `cross-encoder/ms-marco-MiniLM-L-6-v2` | 0.936 | 0.993 | 0.780 | +0.065 | [+0.032, +0.102] | <0.001 | 24 / 5 |
+| + `mixedbread-ai/mxbai-rerank-base-v1` | 0.913 | 0.980 | 0.758 | +0.043 | [+0.006, +0.082] | 0.06 | 24 / 12 |
+
+What this shows:
+
+- **The sample was big enough to see a real gain.** Per-question changes vary a lot
+  (standard deviation ≈ 0.22 for `bge-reranker-base`). With 100 questions, the smallest
+  mean change we could reliably detect (80% power, two-sided α = 0.05, `2.8·sd/√n`) is
+  about **0.06** nDCG@5. MedCPT and MiniLM clear that bar. `bge-reranker-base`'s +0.005
+  does not. mxbai is borderline: its bootstrap interval just excludes zero, but the
+  Wilcoxon test does not reach significance.
+- **The headroom is small but not zero.** Perfectly reordering the 20 candidates would
+  reach nDCG@5 = **0.961**, and the bi-encoder is already at that ceiling on **71 of 100**
+  questions. MedCPT and MiniLM recover about two-thirds of the 0.09 gap.
+  `bge-reranker-base` recovers almost none. It helps and hurts about equally often
+  (24 vs 18 questions), while the better rerankers rarely make things worse.
+- **It is not an implementation bug.** `bge-reranker-base` scores loaded through
+  sentence-transformers match a raw `transformers` forward pass of the same model, so the
+  weak result comes from the model on this data, not from how it is called.
+- **Model size is not the explanation.** The 22M-parameter MiniLM, trained on web
+  search (MS MARCO), beat the 278M-parameter `bge-reranker-base`. MedCPT was trained on
+  PubMed search logs.
+
+**Larger corpus (one-off run, not reproduced by `analysis.py`).** We repeated the
+comparison with the bi-encoder searching a corpus of ~40,000 BioASQ documents. This is
+much harder, and the bi-encoder scores drop accordingly.
+
+| Questions | Bi-encoder | + bge-reranker-base | + MedCPT | + MiniLM |
+|---|---:|---:|---:|---:|
+| 100 | 0.689 | 0.679 (−0.010, n.s.) | 0.742 (+0.053) | 0.741 (+0.053) |
+| 1,000 | 0.658 | 0.669 (+0.012, 95% CI [−0.003, +0.025], p = 0.07) | 0.727 (+0.069, 95% CI [+0.058, +0.080]) | 0.724 (+0.067) |
+
+Even with ten times as many questions, `bge-reranker-base`'s gain is small and not
+significant. MedCPT and MiniLM gain about +0.07. The pattern is the same as on the small
+corpus.
+
+The app still uses `bge-reranker-base`. To try another model, change `RERANKER_MODEL` in
+`reranker.py` (one line), then re-run `python evaluation.py` to refresh the benchmark
+results.
+
 ## How bi-encoders and cross-encoders differ
 
 A **bi-encoder** (`BAAI/bge-small-en-v1.5`, 33M parameters) maps the question and each
@@ -105,6 +167,7 @@ starts immediately. To rebuild or re-run everything:
 ```bash
 python prepare_data.py   # download BioASQ, fetch abstracts from PubMed, embed (~2 min)
 python evaluation.py     # benchmark both pipelines on all questions (~3 min on CPU)
+python analysis.py       # compare four rerankers on the same candidates (downloads ~1.3 GB more)
 pytest                   # metric unit tests
 ```
 
@@ -168,8 +231,10 @@ We report median, mean and p90.
   here are much higher than they would be in real search.
 - **Random distractors.** Many distractors are on unrelated topics, which makes the
   bi-encoder's job easier. Some are near-misses because BioASQ revisits topics.
-- **Small sample, no significance testing.** With 100 questions, differences of a few
-  nDCG points are not meaningful.
+- **Small sample.** With 100 questions, nDCG@5 differences smaller than about 0.06 cannot
+  be reliably detected. The main benchmark reports no significance tests. `analysis.py`
+  does (bootstrap CI and Wilcoxon), but it compares five pipelines without correcting
+  for multiple comparisons.
 - **Truncation.** Both models read at most 512 tokens; long abstracts are cut off.
 - **Latency is machine-specific** and measured on one laptop, one query at a time.
 
@@ -182,5 +247,6 @@ We report median, mean and p90.
 | `retrieval.py` | Bi-encoder model, query embedding, dot-product search |
 | `reranker.py` | Cross-encoder scoring and reranking of a fixed candidate list |
 | `evaluation.py` | Metrics, timed pipeline comparison, benchmark CLI |
+| `analysis.py` | Follow-up: four rerankers on the same candidates, with significance tests |
 | `prepare_data.py` | Dataset download, corpus construction, PubMed fetch, embeddings |
 | `tests/test_evaluation.py` | Unit tests for metrics and search |
