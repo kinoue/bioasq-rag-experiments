@@ -11,6 +11,7 @@ import streamlit as st
 
 from analysis import RESULTS_PATH as RERANKER_COMPARISON_PATH
 from bi_encoder_grid import RESULTS_PATH as GRID_PATH
+from hosted_embeddings import RESULTS_PATH as HOSTED_PATH
 from data import (
     BENCHMARK_PATH,
     load_corpus,
@@ -639,6 +640,53 @@ def grid_takeaways(grid):
     ])
 
 
+def hosted_frame(hosted):
+    def change(stats):
+        return f"{stats['delta_ndcg@5']:+.3f} (p {format_p(stats['wilcoxon_p'])})"
+
+    rows = []
+    models = list(hosted["bi_encoders"])
+    for p in sorted(hosted["pipelines"], key=lambda p: models.index(p["bi_encoder"])):
+        gain = p["gain_from_reranking"]
+        rows.append({
+            "Bi-encoder": hosted["bi_encoders"][p["bi_encoder"]]["model"],
+            "Reranker": NO_RERANKER if p["reranker"] == "none" else p["reranker"],
+            "nDCG@5": p["metrics"]["ndcg@5"],
+            "MRR@5": p["metrics"]["mrr@5"],
+            "Recall@5": p["metrics"]["recall@5"],
+            f"Rank of {hosted['total_pipelines_ranked']}": p["rank_of_all"],
+            "vs bge-small, same reranker": change(p["vs_bge_small_bi_encoder"]),
+            "vs MedCPT, same reranker": change(p["vs_medcpt_bi_encoder"]),
+            "Gain from reranking": gain and change(gain),
+        })
+    return pd.DataFrame(rows)
+
+
+def hosted_section():
+    st.divider()
+    st.subheader("3. A hosted embedding API (Experiment 4)")
+    if not HOSTED_PATH.exists():
+        st.info("Run `python hosted_embeddings.py` to add this comparison. It needs an OpenAI API key.")
+        return
+    hosted = json.loads(HOSTED_PATH.read_text())
+    st.caption(
+        f"Precomputed by `hosted_embeddings.py` on {hosted['created'][:10]}. The bi-encoder runs "
+        f"on the provider's servers and the reranker runs locally. Ranks include Experiment 3's "
+        f"pipelines. Anthropic has no embedding model and points to Voyage AI, which wasn't tested."
+    )
+    for label, info in hosted["bi_encoders"].items():
+        st.markdown(f"**{label}**")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Recall@20", f"{info['recall@20']:.3f}")
+        c2.metric("Best possible nDCG@5", f"{info['oracle_ndcg@5']:.3f}")
+        c3.metric("Median query embedding call", f"{info['query_api_latency_ms']['median']:.0f} ms",
+                  help="One network call per question, measured from this machine")
+        c4.metric("Tokens billed", f"{info['tokens_billed']:,}")
+    st.dataframe(hosted_frame(hosted), hide_index=True, placeholder="—", column_config={
+        c: st.column_config.NumberColumn(format="%.3f") for c in ("nDCG@5", "MRR@5", "Recall@5")
+    })
+
+
 def grid_tab():
     if not GRID_PATH.exists():
         st.info("Run `LAB_DEVICE=mps python bi_encoder_grid.py` to build this comparison.")
@@ -695,6 +743,8 @@ def grid_tab():
         "Gain from reranking": st.column_config.NumberColumn(
             format="%+.3f", help="nDCG@5 change from adding this reranker to the same bi-encoder"),
     })
+
+    hosted_section()
 
 
 # ------------------------------------------------------------ details ---

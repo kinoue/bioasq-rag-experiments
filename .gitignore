@@ -3,3 +3,5 @@ __pycache__/
 .pytest_cache/
 data/raw/
 .claude/
+.env
+data/embedding_cache/

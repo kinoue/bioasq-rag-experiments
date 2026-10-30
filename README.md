@@ -1,6 +1,6 @@
 # BioASQ RAG Experiments
 
-How much does a reranker improve retrieval on biomedical questions? Three experiments,
+How much does a reranker improve retrieval on biomedical questions? Four experiments,
 each prompted by the last, found that **which models you pick matters more than whether
 you rerank**. A Streamlit app lets you inspect the results and individual questions.
 
@@ -125,6 +125,42 @@ Table values other than Recall@20 are nDCG@5. Bold marks the top four pipelines.
   of the two strongest (bge-base and MedCPT, neither significantly).
 - **Domain tuning isn't automatically better.** MedEmbed-small, bge-small fine-tuned on
   clinical text, didn't beat bge-small (−0.010, not significant).
+- **Next question:** how does a widely used hosted embedding API compare?
+
+## Experiment 4: What about a hosted embedding API?
+
+**Setup:** OpenAI's `text-embedding-3-small` and `text-embedding-3-large` as the bi-encoder, each
+alone and followed by the two best rerankers, which run locally (`hosted_embeddings.py`). All other
+settings match Experiment 3.
+
+**Primary observation: the large model was a clear step up from the small one. With a reranker, it
+ranked 3rd and 4th of 41 pipelines, just behind the two MedCPT pipelines.**
+
+| OpenAI model | Reranker | nDCG@5 | Rank of 41 | Vs. bge-small, same reranker | Vs. MedCPT, same reranker | Gain from reranking |
+|---|---|---:|---:|---:|---:|---:|
+| 3-small | None | 0.875 | 28 | +0.005 (p = 0.74) | −0.033 (p = 0.007) | |
+| 3-small | MedCPT | 0.936 | 8 | +0.005 (p = 0.70) | −0.024 (p = 0.001) | +0.061 (p < 0.001) |
+| 3-small | MiniLM | 0.944 | 5 | +0.008 (p = 0.34) | −0.015 (p = 0.030) | +0.069 (p < 0.001) |
+| 3-large | None | 0.917 | 16 | +0.047 (p = 0.020) | +0.009 (p = 0.78) | |
+| 3-large | MedCPT | 0.953 | 3 | +0.021 (p = 0.052) | −0.008 (p = 0.19) | +0.035 (p = 0.001) |
+| 3-large | MiniLM | 0.950 | 4 | +0.014 (p = 0.056) | −0.008 (p = 0.16) | +0.033 (p = 0.002) |
+
+**Analysis:**
+
+- **Being hosted doesn't settle it; the model does.** The small model was no better than bge-small,
+  while the large one beat the small one when used alone (+0.042, p = 0.001).
+- **The large model alone had the highest score of any bi-encoder**, but it is statistically level
+  with MedCPT alone (95% CI −0.021 to +0.041). MedCPT also has the better candidate pool, with
+  Recall@20 of 0.990, vs. 0.965 for 3-large, 0.929 for 3-small and 0.921 for bge-small.
+- **MedCPT's lead over the large model isn't established.** MedCPT + MedCPT is still first, but
+  the 0.008 gap to the large model with the same reranker isn't significant.
+- **A better first stage leaves less for the reranker.** Rerankers add +0.033 to +0.035 after the
+  large model, about half their +0.061 to +0.069 after the small one. The gap between the two
+  models shrinks from +0.042 alone to +0.016 with MedCPT (p = 0.021) and +0.006 with MiniLM (p = 0.33).
+- **Hosted models cost time and money.** A query embedding call took a median of 202 ms (small) or
+  262 ms (large) from this laptop, vs. 5–9 ms for local models on the Apple GPU. Each model used
+  863,958 tokens for the corpus and questions, costing about $0.02 (small) or $0.11 (large). The
+  large model's vectors also have 3,072 dimensions, 8× bge-small's.
 
 ## Limitations
 
@@ -133,14 +169,17 @@ Table values other than Recall@20 are nDCG@5. Bold marks the top four pipelines.
 - **Small, curated corpus.** Every relevant document is guaranteed to be among 2,500 abstracts,
   many distractors are off-topic, and absolute scores would be lower across all of PubMed.
 - **Many comparisons, uncorrected.** Experiment 3 makes 34 comparisons against one baseline,
-  so one or two could look significant by chance. Trust patterns over single cells.
+  and Experiment 4 adds more, so one or two could look significant by chance. Trust patterns
+  over single cells.
 - **MedCPT may have a home advantage.** It was trained on PubMed search clicks, and BioASQ
   experts also found their documents through PubMed search.
 - **Latency is only partly measured.** The CPU figures cover Experiment 1's pipeline.
   Experiment 2 didn't measure latency, and Experiment 3 measured only bi-encoder query time,
-  on the Apple GPU (5–9 ms for every model).
-- **Truncation.** Models read at most 512 tokens (MedCPT queries 64, MiniLM bi-encoder 384), so
-  long abstracts are cut off.
+  on the Apple GPU (5–9 ms for every model). Experiment 4's API time depends on the network.
+- **Truncation.** Local models read at most 512 tokens (MedCPT queries 64, MiniLM bi-encoder 384),
+  which cuts off about 11% of abstracts. OpenAI's limit is 8,192, so it reads them whole.
+- **Hosted models can change.** Experiment 4 is a snapshot of two OpenAI models, and their cached
+  vectors aren't in this repo.
 
 ## Run it
 
@@ -157,20 +196,24 @@ The app has four tabs:
 
 - **Query Explorer:** compare the Experiment 1 rankings side by side for one question.
 - **Benchmark Results:** Experiments 1 and 2.
-- **Bi-encoder × Reranker:** Experiment 3.
+- **Bi-encoder × Reranker:** Experiments 3 and 4.
 - **Experiment Details:** setup, methodology and limitations.
 
-To reproduce the results (the last two scripts download more models):
+To reproduce the results (the Experiment 2–4 scripts download more models):
 
 ```bash
 python prepare_data.py                    # build the corpus and embeddings (~2 min)
 python evaluation.py                      # Experiment 1 (~3 min on CPU)
 python analysis.py                        # Experiment 2
 LAB_DEVICE=mps python bi_encoder_grid.py  # Experiment 3 (roughly 25 min on Apple GPU)
+LAB_DEVICE=mps python hosted_embeddings.py # Experiment 4 (needs an OpenAI key, about $0.13)
 pytest                                    # unit tests
 ```
 
 Everything runs on CPU unless you set `LAB_DEVICE` to `mps` or `cuda`.
+
+Only Experiment 4 needs an API key. Set `OPENAI_API_KEY` as an environment variable, or put it in
+`~/.config/bioasq-rag-experiments/.env`, outside the repo and any synced folder.
 
 | File | Purpose |
 |---|---|
@@ -181,6 +224,7 @@ Everything runs on CPU unless you set `LAB_DEVICE` to `mps` or `cuda`.
 | `evaluation.py` | Metrics, timing and the Experiment 1 benchmark |
 | `analysis.py` | Experiment 2 |
 | `bi_encoder_grid.py` | Experiment 3 |
+| `hosted_embeddings.py` | Experiment 4 |
 | `prepare_data.py` | Dataset download, corpus construction and embeddings |
 | `tests/test_evaluation.py` | Metric and search tests |
 
