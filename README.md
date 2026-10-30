@@ -1,215 +1,151 @@
 # BioASQ RAG Experiments
 
-A small, educational experiment comparing two ways to find PubMed abstracts that
-answer a biomedical question:
+How much does a reranker improve retrieval on biomedical questions? Three experiments,
+each prompted by the last, found that **which models you pick matters more than whether
+you rerank**. A Streamlit app lets you inspect the results and individual questions.
 
-- **A. Bi-encoder retrieval:** embed the question, return the 5 most similar abstracts.
-- **B. Bi-encoder + cross-encoder reranking:** take the *same* top 20 candidates from A,
-  rescore each (question, abstract) pair with a cross-encoder, and return the new top 5.
+This is a learning project, not a production RAG system. It does not generate answers.
 
-Both pipelines rank an identical candidate pool, so any difference comes from reranking
-alone. A Streamlit app shows the two rankings side by side, how every candidate moved,
-and aggregate benchmark results on 100 BioASQ questions.
+**The two stages being compared:**
 
-This is a learning project, not a production RAG system: there is no answer generation,
-and the corpus is a small curated set (see [Limitations](#limitations)).
+- A **bi-encoder** embeds the question and each document separately, then compares the
+  vectors. Document vectors are precomputed, so searching a corpus takes milliseconds, but
+  the model never reads the question and document together.
+- A **cross-encoder** (reranker) reads the question and one document together and scores
+  the pair. This is slower and can't be precomputed, so it only reorders the bi-encoder's
+  top candidates.
 
-## Results
+**Shared setup:** 100 BioASQ questions and 2,500 PubMed abstracts. Each bi-encoder
+retrieves 20 candidates and each pipeline returns a top 5, scored mainly by nDCG@5.
+Changes are compared question by question, using a 95% bootstrap CI and a Wilcoxon
+signed-rank p-value. See [Data and evaluation](#data-and-evaluation).
 
-100 BioASQ questions, a 2,500-abstract corpus, CPU (Apple M3 Max, 10 PyTorch threads):
+## Experiment 1: Does a reranker help?
 
-| Metric | Bi-encoder | + Reranker | Difference |
-|---|---:|---:|---:|
-| Recall@5 | 0.728 | 0.732 | +0.004 |
-| MRR@5 | 0.943 | 0.949 | +0.006 |
-| nDCG@5 | 0.871 | 0.875 | +0.005 |
-| Recall@20 (shared candidate pool) | 0.921 | 0.921 | 0 |
-| Median latency per query | 13 ms | 1,674 ms | ~130× slower |
+**Setup:** `BAAI/bge-small-en-v1.5` bi-encoder alone vs. the same bi-encoder followed by
+`BAAI/bge-reranker-base`. Both rank the same 20 candidates. Run on CPU (Apple M3 Max).
 
-Per question, reranking **improved** nDCG@5 on 24 questions, left it **unchanged** on 58,
-and **degraded** it on 18. On the Apple GPU (`LAB_DEVICE=mps`), reranking took about
-300 ms per query (measured on the first 30 questions).
+**Primary observation: no significant difference.** nDCG@5 changed by +0.005
+(95% CI [−0.037, +0.047], p = 0.82), while median latency rose about 130×.
 
-### What I learned
+| Metric | Bi-encoder | + bge-reranker-base |
+|---|---:|---:|
+| nDCG@5 | 0.871 | 0.875 |
+| MRR@5 | 0.943 | 0.949 |
+| Recall@5 | 0.728 | 0.732 |
+| Recall@20 (same candidates) | 0.921 | 0.921 |
+| Median latency per query | 13 ms | 1,674 ms |
 
-1. **This reranker barely helped here, but reranking in general does.** The +0.005
-   nDCG@5 gain from `bge-reranker-base` is within noise. Two other cross-encoders, scoring
-   the *same* 20 candidates, gained about +0.06 with clear statistical significance. The
-   choice of reranker mattered more than the decision to rerank. See the
-   [follow-up analysis](#why-reranking-barely-helped-follow-up-analysis).
-2. **The average hides large swings in both directions.** Individual questions moved by
-   between −0.68 and +0.83 nDCG@5. Reranking is not a uniform improvement.
-3. **The cross-encoder fixes "keyword-similar but off-topic" errors.** It reads the
-   question and abstract together, so it can tell that "COMPASS complex" is a histone
-   methyltransferase complex and not just any protein complex.
-4. **It also makes confident mistakes.** It sometimes pushes documents that match a
-   prominent phrase in the question (e.g. "long non-coding RNA") above documents that
-   address the actual question (lncRNAs *in Alzheimer's disease*).
-5. **Cost is the real trade-off.** Scoring 20 pairs with a 278M-parameter cross-encoder
-   costs ~1.7 s on CPU, versus ~13 ms for the whole bi-encoder search.
+**Analysis:**
 
-### Examples
+- **The bi-encoder was already doing well.** It ranked a relevant document first on 92 of
+  100 questions. On 71 questions its top 5 was already the best possible ordering of its
+  candidates, so a reranker could only make those worse. Even a perfect reordering would
+  only reach nDCG@5 0.961.
+- **The cross-encoder hurt almost as much as it helped.** nDCG@5 improved on 24 questions,
+  got worse on 18, and didn't change on 58. Large swings nearly cancelled out:
+  - *"List the components of the COMPASS complex"* improved from 0.00 to 0.83. The
+    bi-encoder matched generic "complex" and "component" papers; the reranker promoted real
+    COMPASS papers from ranks 9, 10 and 14.
+  - *"Is there any evidence of dysregulated long non coding RNAs and Alzheimer's disease?"*
+    fell from 1.00 to 0.32. The bi-encoder's top 5 were all relevant; the reranker moved
+    two papers on lncRNAs in cancer to the top.
+- **Next question:** is this true of reranking in general, or of this reranker?
 
-Where reranking **helped** (nDCG@5, bi-encoder → reranked):
+## Experiment 2: What about other cross-encoders?
 
-- **"List the components of the COMPASS complex"** (0.00 → 0.83). The bi-encoder's top 5
-  were generic "complex"/"component" papers (complexins, MRI independent components).
-  The reranker promoted three real COMPASS papers from ranks 9, 10 and 14.
-- **"Are there negative enhancers?"** (0.13 → 0.87). The bi-encoder matched "enhancer"
-  broadly (enhancer maps, insulators). The reranker promoted papers on
-  *negative enhancer-like elements* and silencers from ranks 6–19.
-- **"What is filipin staining used for?"** (0.15 → 0.72). The bi-encoder retrieved
-  Western-blot staining papers; the reranker found the cholesterol/Niemann-Pick type C
-  papers where filipin is actually used.
+**Setup:** the same bge-small candidates, reordered by three more cross-encoders
+(`analysis.py`).
 
-Where reranking **hurt**:
+**Primary observation: some cross-encoders improved results significantly.** MedCPT and
+MiniLM each gained about +0.06 nDCG@5 on the candidates where bge-reranker-base gained
+almost nothing.
 
-- **"Is there any evidence of dysregulated long non coding RNAs and Alzheimer's
-  disease?"** (1.00 → 0.32). The bi-encoder's top 5 were all relevant. The reranker
-  promoted "Long non-coding RNA in cancer" and a HOTAIR/metastasis paper to the top two
-  spots.
-- **"Which biological process takes place in nuclear speckles?"** (1.00 → 0.35). The
-  reranker put a DNA-damage-response paper first and scored a relevant mRNA-trafficking
-  paper at only 0.012.
-- **"Which olfactory gene senses androsterone?"** (0.87 → 0.32). The reranker preferred
-  steroid-synthesis papers (CYP17 inhibitors) over the odorant-perception papers.
+| Reranker | nDCG@5 | Change | 95% CI | p | Better / worse |
+|---|---:|---:|---|---:|---:|
+| None (bi-encoder only) | 0.871 | | | | |
+| `cross-encoder/ms-marco-MiniLM-L-6-v2` | 0.936 | +0.065 | [+0.032, +0.102] | <0.001 | 24 / 5 |
+| `ncbi/MedCPT-Cross-Encoder` | 0.931 | +0.061 | [+0.033, +0.092] | <0.001 | 27 / 4 |
+| `mixedbread-ai/mxbai-rerank-base-v1` | 0.913 | +0.043 | [+0.006, +0.082] | 0.06 | 24 / 12 |
+| `BAAI/bge-reranker-base` | 0.875 | +0.005 | [−0.037, +0.047] | 0.82 | 24 / 18 |
 
-Select any question in the app's **Benchmark Results** table to see these rankings.
+**Analysis:**
 
-## Why reranking barely helped (follow-up analysis)
+- **Experiment 1's result came from the model, not from reranking itself.** The better
+  rerankers rarely made a question worse. Size doesn't explain the gap either: the 22M-parameter
+  MiniLM beat the 278M-parameter bge-reranker-base. We also confirmed bge-reranker-base's
+  scores match a direct `transformers` run, so this isn't a loading bug.
+- **100 questions was enough to see this.** The sample can reliably detect a change of about
+  0.06 nDCG@5. A one-off check on 1,000 questions and a ~40,000-document corpus showed the
+  same pattern: bge-reranker-base +0.012 (95% CI [−0.003, +0.025], p = 0.07), MedCPT +0.069
+  ([+0.058, +0.080]) and MiniLM +0.067. The scripts for this run aren't in the repo.
+- **Next question:** we've only varied the reranker. What if we change the bi-encoder?
 
-`python analysis.py` takes the bi-encoder's top 20 for each question once, then reorders
-those same candidates with four different cross-encoders. Every model reads at most 512
-tokens of `title + "\n" + abstract`. For each reranker it reports the paired change in
-nDCG@5 against the bi-encoder:
+## Experiment 3: What about other bi-encoders?
 
-- a 95% bootstrap confidence interval (10,000 resamples of the 100 questions);
-- a Wilcoxon signed-rank p-value (on questions whose score changed);
-- how many questions improved or got worse.
+**Setup:** seven bi-encoders, each alone and followed by each of the four rerankers, for 35
+pipelines (`bi_encoder_grid.py`). Each bi-encoder retrieves its own 20 candidates, so a
+pipeline can win through better candidates, better ordering, or both.
 
-Results are saved to `data/reranker_comparison.json`.
+**Primary observation: MedCPT bi-encoder + MedCPT reranker performed best**, with nDCG@5
+0.961. That is +0.090 over bge-small alone (95% CI [+0.054, +0.131], p < 0.001).
 
-Same 2,500-abstract corpus and 100 questions as above:
+| Bi-encoder | Recall@20 | No reranker | MedCPT | MiniLM | mxbai | bge-reranker |
+|---|---:|---:|---:|---:|---:|---:|
+| MedCPT | 0.990 | 0.908 | **0.961** | **0.959** | 0.932 | 0.900 |
+| bge-base | 0.940 | 0.900 | **0.940** | **0.942** | 0.911 | 0.868 |
+| bge-small | 0.921 | 0.871 | 0.931 | 0.936 | 0.913 | 0.875 |
+| MedEmbed-small | 0.914 | 0.861 | 0.930 | 0.934 | 0.911 | 0.877 |
+| mxbai-embed-xsmall | 0.901 | 0.836 | 0.923 | 0.934 | 0.906 | 0.863 |
+| PubMedBERT | 0.846 | 0.773 | 0.892 | 0.890 | 0.873 | 0.840 |
+| MiniLM | 0.755 | 0.737 | 0.839 | 0.844 | 0.835 | 0.810 |
 
-| Pipeline | nDCG@5 | MRR@5 | Recall@5 | ΔnDCG@5 | 95% CI | Wilcoxon p | Improved / degraded |
-|---|---:|---:|---:|---:|---|---:|---:|
-| Bi-encoder only | 0.871 | 0.943 | 0.728 | | | | |
-| + `BAAI/bge-reranker-base` (default) | 0.875 | 0.949 | 0.732 | +0.005 | [−0.037, +0.047] | 0.82 | 24 / 18 |
-| + `ncbi/MedCPT-Cross-Encoder` | 0.931 | 0.985 | 0.778 | +0.061 | [+0.033, +0.092] | <0.001 | 27 / 4 |
-| + `cross-encoder/ms-marco-MiniLM-L-6-v2` | 0.936 | 0.993 | 0.780 | +0.065 | [+0.032, +0.102] | <0.001 | 24 / 5 |
-| + `mixedbread-ai/mxbai-rerank-base-v1` | 0.913 | 0.980 | 0.758 | +0.043 | [+0.006, +0.082] | 0.06 | 24 / 12 |
+Table values other than Recall@20 are nDCG@5. Bold marks the top four pipelines. Models:
+`ncbi/MedCPT-Query-Encoder` + `ncbi/MedCPT-Article-Encoder`, `BAAI/bge-base-en-v1.5`,
+`BAAI/bge-small-en-v1.5`, `abhinand/MedEmbed-small-v0.1`,
+`mixedbread-ai/mxbai-embed-xsmall-v1`, `NeuML/pubmedbert-base-embeddings`,
+`sentence-transformers/msmarco-MiniLM-L6-cos-v5`.
 
-What this shows:
+**Analysis:**
 
-- **The sample was big enough to see a real gain.** Per-question changes vary a lot
-  (standard deviation ≈ 0.22 for `bge-reranker-base`). With 100 questions, the smallest
-  mean change we could reliably detect (80% power, two-sided α = 0.05, `2.8·sd/√n`) is
-  about **0.06** nDCG@5. MedCPT and MiniLM clear that bar. `bge-reranker-base`'s +0.005
-  does not. mxbai is borderline: its bootstrap interval just excludes zero, but the
-  Wilcoxon test does not reach significance.
-- **The headroom is small but not zero.** Perfectly reordering the 20 candidates would
-  reach nDCG@5 = **0.961**, and the bi-encoder is already at that ceiling on **71 of 100**
-  questions. MedCPT and MiniLM recover about two-thirds of the 0.09 gap.
-  `bge-reranker-base` recovers almost none. It helps and hurts about equally often
-  (24 vs 18 questions), while the better rerankers rarely make things worse.
-- **It is not an implementation bug.** `bge-reranker-base` scores loaded through
-  sentence-transformers match a raw `transformers` forward pass of the same model, so the
-  weak result comes from the model on this data, not from how it is called.
-- **Model size is not the explanation.** The 22M-parameter MiniLM, trained on web
-  search (MS MARCO), beat the 278M-parameter `bge-reranker-base`. MedCPT was trained on
-  PubMed search logs.
+- **The top four form a clean block: {MedCPT, bge-base} bi-encoder × {MedCPT, MiniLM}
+  reranker.** Inside the block, the bi-encoder matters and the reranker doesn't. MedCPT
+  beats bge-base by about +0.02 (p = 0.01 and 0.04), while the two rerankers are
+  indistinguishable (p = 0.89 and 0.45). Only the two MedCPT bi-encoder pipelines pull away
+  from ranks 5–9, by about +0.02 to +0.03, and not every one of those comparisons is
+  significant. The two bge-base pipelines can't be separated from ranks 5–9.
+- **The MedCPT bi-encoder alone holds up well.** At 0.908 it ranks 15th of 35 and beats
+  every bge-reranker-base pipeline, including the original two-stage setup from Experiment 1
+  (0.875). Only three pipelines are clearly ahead of it: the two MedCPT bi-encoder pipelines
+  above and bge-base + MedCPT (p = 0.016). It also avoids the cross-encoder step.
+- **A reranker can't recover what the bi-encoder missed.** The MiniLM bi-encoder gains up to
+  +0.107 from reranking but tops out at 0.844, because its candidates contain only 75% of the
+  relevant documents.
+- **bge-reranker-base is the weakest reranker for every bi-encoder**, and it lowers the score
+  of the two strongest (bge-base and MedCPT, neither significantly).
+- **Domain tuning isn't automatically better.** MedEmbed-small, bge-small fine-tuned on
+  clinical text, didn't beat bge-small (−0.010, not significant).
 
-**Larger corpus (one-off run, not reproduced by `analysis.py`).** We repeated the
-comparison with the bi-encoder searching a corpus of ~40,000 BioASQ documents. This is
-much harder, and the bi-encoder scores drop accordingly.
+## Limitations
 
-| Questions | Bi-encoder | + bge-reranker-base | + MedCPT | + MiniLM |
-|---|---:|---:|---:|---:|
-| 100 | 0.689 | 0.679 (−0.010, n.s.) | 0.742 (+0.053) | 0.741 (+0.053) |
-| 1,000 | 0.658 | 0.669 (+0.012, 95% CI [−0.003, +0.025], p = 0.07) | 0.727 (+0.069, 95% CI [+0.058, +0.080]) | 0.724 (+0.067) |
+- **Incomplete labels.** BioASQ annotates a limited set of documents, so a top-ranked
+  "unlabeled" document may actually be relevant.
+- **Small, curated corpus.** Every relevant document is guaranteed to be among 2,500 abstracts,
+  many distractors are off-topic, and absolute scores would be lower across all of PubMed.
+- **Many comparisons, uncorrected.** Experiment 3 makes 34 comparisons against one baseline,
+  so one or two could look significant by chance. Trust patterns over single cells.
+- **MedCPT may have a home advantage.** It was trained on PubMed search clicks, and BioASQ
+  experts also found their documents through PubMed search.
+- **Latency is only partly measured.** The CPU figures cover Experiment 1's pipeline.
+  Experiment 2 didn't measure latency, and Experiment 3 measured only bi-encoder query time,
+  on the Apple GPU (5–9 ms for every model).
+- **Truncation.** Models read at most 512 tokens (MedCPT queries 64, MiniLM bi-encoder 384), so
+  long abstracts are cut off.
 
-Even with ten times as many questions, `bge-reranker-base`'s gain is small and not
-significant. MedCPT and MiniLM gain about +0.07. The pattern is the same as on the small
-corpus.
+## Run it
 
-The app still uses `bge-reranker-base`. To try another model, change `RERANKER_MODEL` in
-`reranker.py` (one line), then re-run `python evaluation.py` to refresh the benchmark
-results.
-
-## Comparing bi-encoders too (bi-encoder × reranker grid)
-
-The comparison above changes only the reranker. To be fair to the first stage as well,
-`bi_encoder_grid.py` swaps the bi-encoder. Each bi-encoder retrieves its **own** top 20,
-so a pipeline can win by finding better candidates, by ordering them better, or both.
-Every bi-encoder is run alone and with each of the four rerankers (35 pipelines). All
-differences are paired against the app's baseline, `bge-small-en-v1.5` alone. Results
-are in `data/bi_encoder_grid.json` and the app's **Bi-encoder × Reranker** tab.
-
-Bi-encoders, chosen to mirror the rerankers' families plus two biomedical models:
-
-| Bi-encoder | Params | nDCG@5 alone | Δ vs app baseline (95% CI) | Recall@20 |
-|---|---:|---:|---|---:|
-| `BAAI/bge-small-en-v1.5` (app) | 33M | 0.871 | — | 0.921 |
-| `BAAI/bge-base-en-v1.5` | 109M | 0.900 | +0.030 [+0.007, +0.054] | 0.940 |
-| `ncbi/MedCPT-Query-Encoder` + `-Article-Encoder` | 219M | **0.908** | +0.038 [+0.007, +0.071] | **0.990** |
-| `sentence-transformers/msmarco-MiniLM-L6-cos-v5` | 23M | 0.737 | −0.133 [−0.179, −0.089] | 0.755 |
-| `mixedbread-ai/mxbai-embed-xsmall-v1` | 24M | 0.836 | −0.035 [−0.065, −0.006] | 0.901 |
-| `abhinand/MedEmbed-small-v0.1` | 33M | 0.861 | −0.010 [−0.026, +0.005] | 0.914 |
-| `NeuML/pubmedbert-base-embeddings` | 109M | 0.773 | −0.097 [−0.136, −0.062] | 0.846 |
-
-nDCG@5 for every combination:
-
-| Bi-encoder \ reranker | none | bge-reranker-base | MedCPT | MiniLM-L6 | mxbai-rerank-base |
-|---|---:|---:|---:|---:|---:|
-| bge-small (app) | 0.871 | 0.875 | 0.931 | 0.936 | 0.913 |
-| bge-base | 0.900 | 0.868 | 0.940 | 0.942 | 0.911 |
-| MedCPT | 0.908 | 0.900 | **0.961** | 0.959 | 0.932 |
-| MiniLM-L6 (MS MARCO) | 0.737 | 0.810 | 0.839 | 0.844 | 0.835 |
-| mxbai-embed-xsmall | 0.836 | 0.863 | 0.923 | 0.934 | 0.906 |
-| MedEmbed-small | 0.861 | 0.877 | 0.930 | 0.934 | 0.911 |
-| PubMedBERT (NeuML) | 0.773 | 0.840 | 0.892 | 0.890 | 0.873 |
-
-What this adds:
-
-- **A better first stage alone beats the app's two-stage pipeline.** MedCPT's bi-encoder
-  scores 0.908 with no reranker, above `bge-small + bge-reranker-base` (0.875), at the
-  same query latency. Its candidates contain 99% of the relevant documents.
-- **The best pipeline is MedCPT + MedCPT** (0.961, +0.090 vs. the app's baseline,
-  95% CI [+0.054, +0.131]). That equals the best possible score from reordering
-  `bge-small`'s candidates, and it gets there because MedCPT's candidates are better.
-- **Reranking helps weak first stages most, but can't rescue them.** The MS MARCO MiniLM
-  and PubMedBERT bi-encoders gain about +0.10–0.12 from MedCPT or MiniLM reranking,
-  yet still finish below `bge-small` + the same reranker, because their 20 candidates miss
-  more relevant documents (Recall@20 0.755 and 0.846).
-- **`bge-reranker-base` is the weak reranker with every bi-encoder.** It slightly hurts the
-  two strongest first stages (−0.033 after bge-base, −0.009 after MedCPT, neither
-  significant).
-- **Domain fine-tuning alone was not enough.** MedEmbed-small, `bge-small` fine-tuned on
-  clinical text, did not beat `bge-small` (−0.010, n.s.).
-
-Caveats: 34 comparisons against one baseline means one or two could look significant by
-chance at p < 0.05. MedCPT was trained on PubMed search clicks, and BioASQ experts found
-their documents through PubMed search, which may favour it. The grid ran on the Apple GPU
-(`LAB_DEVICE=mps`); bi-encoder query latencies there were 5–9 ms for every model.
-
-## How bi-encoders and cross-encoders differ
-
-A **bi-encoder** (`BAAI/bge-small-en-v1.5`, 33M parameters) maps the question and each
-document to vectors *independently*. Document vectors are computed once, ahead of time.
-At query time we embed only the question and take a dot product with every document
-vector (embeddings are L2-normalized, so this is cosine similarity). That is fast enough
-to search a whole corpus, but the model never sees the question and document together.
-
-A **cross-encoder** (`BAAI/bge-reranker-base`, 278M parameters) takes the question and one
-document as a single input and outputs a relevance score. Every question token can
-attend to every document token, so it can model interactions such as "this abstract
-mentions COMPASS *and* lists its subunits". Nothing can be precomputed, so it runs once
-per pair. That is why it is used only to rerank a short candidate list.
-
-## Install and run
-
-Requires Python 3.10+ and about 1.5 GB of disk for the two models (downloaded from
-Hugging Face on first run). No API keys or paid services are needed.
+Requires Python 3.10+. No API keys or paid services are needed. Prepared data and results are
+in `data/`, so the app starts right away after downloading its two models (about 1.5 GB).
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -217,94 +153,54 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The prepared corpus, embeddings and benchmark results are already in `data/`, so the app
-starts immediately. To rebuild or re-run everything:
+The app has four tabs:
+
+- **Query Explorer:** compare the Experiment 1 rankings side by side for one question.
+- **Benchmark Results:** Experiments 1 and 2.
+- **Bi-encoder × Reranker:** Experiment 3.
+- **Experiment Details:** setup, methodology and limitations.
+
+To reproduce the results (the last two scripts download more models):
 
 ```bash
-python prepare_data.py   # download BioASQ, fetch abstracts from PubMed, embed (~2 min)
-python evaluation.py     # benchmark both pipelines on all questions (~3 min on CPU)
-python analysis.py       # compare four rerankers on the same candidates (downloads ~1.3 GB more)
-LAB_DEVICE=mps python bi_encoder_grid.py  # 7 bi-encoders × 5 reranker settings (~25 min on MPS)
-pytest                   # metric unit tests
+python prepare_data.py                    # build the corpus and embeddings (~2 min)
+python evaluation.py                      # Experiment 1 (~3 min on CPU)
+python analysis.py                        # Experiment 2
+LAB_DEVICE=mps python bi_encoder_grid.py  # Experiment 3 (roughly 25 min on Apple GPU)
+pytest                                    # unit tests
 ```
 
-Everything runs on CPU by default. Set `LAB_DEVICE=mps` (Apple silicon) or
-`LAB_DEVICE=cuda` to use a GPU.
-
-## Dataset and corpus
-
-- **Source:** the official **BioASQ Task 11b training set** (`training11b.json`, 4,719
-  questions), licensed CC BY 2.5. BioASQ distributes it after free registration; this
-  project downloads an unchanged copy from the
-  [`rag-datasets/rag-mini-bioasq`](https://huggingface.co/datasets/rag-datasets/rag-mini-bioasq)
-  Hugging Face repository, pinned to commit `224a87f` and verified by SHA-256.
-- **Questions:** 100 questions sampled with seed 13 from those with 2–10 relevant
-  documents (20 factoid, 19 list, 29 yes/no, 32 summary). The range keeps Recall@5
-  meaningful and leaves room for the ranking to change.
-- **Relevance labels:** the official BioASQ document lists, unchanged. On average there
-  are 5.22 relevant documents per question.
-- **Corpus:** 2,500 PubMed abstracts: all 522 relevant documents of the evaluation
-  questions, plus 1,978 distractors. Distractors are the relevant documents of other,
-  randomly sampled BioASQ 11b questions. They are real biomedical abstracts, but they
-  were not judged for the evaluation questions.
-- **Text:** titles and abstracts fetched from NCBI E-utilities (`efetch`). The 14 records
-  with no abstract were dropped from the corpus and from the labels. Each document is
-  represented as `title + "\n" + abstract`.
-- `data/metadata.json` records the source URL, checksum, seed, fetch date and counts.
-  Because PubMed records can be revised, re-running `prepare_data.py` later may give
-  slightly different text.
-
-## How the evaluation works
-
-For each question, both pipelines produce a ranked top 5. We then compute three metrics,
-treating a document as relevant only if BioASQ lists it:
-
-- **Recall@5:** the fraction of the question's relevant documents found in the top 5.
-  When a question has more than 5 relevant documents, the maximum possible score is
-  below 1.
-- **MRR@5:** 1 / rank of the first relevant document (0 if none is in the top 5).
-- **nDCG@5:** the sum of `1 / log2(rank + 1)` over relevant hits, divided by the same sum
-  for a perfect ranking of `min(#relevant, 5)` relevant documents.
-
-Scores are averaged over the 100 questions. As a sanity check, the benchmark confirms
-that both pipelines rank identical candidate sets and therefore have the same Recall@20.
-
-**Latency** is measured with `time.perf_counter()`, one question at a time, after one
-discarded warm-up query:
-
-- *Retrieval* covers query embedding plus the dot-product search.
-- *Reranking* covers 20 cross-encoder pairs in one batch plus the sort.
-- Model loading and corpus embedding are excluded.
-
-We report median, mean and p90.
-
-## Limitations
-
-- **Incomplete judgments.** BioASQ experts annotated a limited set of documents per
-  question. An unlabeled document in the top 5 may actually be relevant, which can
-  penalize either pipeline unfairly.
-- **Small, curated corpus.** Every relevant document is guaranteed to be among only
-  2,500 abstracts. Searching all 36M+ PubMed records is far harder, and absolute scores
-  here are much higher than they would be in real search.
-- **Random distractors.** Many distractors are on unrelated topics, which makes the
-  bi-encoder's job easier. Some are near-misses because BioASQ revisits topics.
-- **Small sample.** With 100 questions, nDCG@5 differences smaller than about 0.06 cannot
-  be reliably detected. The main benchmark reports no significance tests. `analysis.py`
-  does (bootstrap CI and Wilcoxon), but it compares five pipelines without correcting
-  for multiple comparisons.
-- **Truncation.** Both models read at most 512 tokens; long abstracts are cut off.
-- **Latency is machine-specific** and measured on one laptop, one query at a time.
-
-## Code layout
+Everything runs on CPU unless you set `LAB_DEVICE` to `mps` or `cuda`.
 
 | File | Purpose |
 |---|---|
-| `app.py` | Streamlit UI: Query Explorer, Benchmark Results, Bi-encoder × Reranker, Experiment Details |
-| `data.py` | File paths and loaders for questions, corpus, embeddings |
-| `retrieval.py` | Bi-encoder model, query embedding, dot-product search |
-| `reranker.py` | Cross-encoder scoring and reranking of a fixed candidate list |
-| `evaluation.py` | Metrics, timed pipeline comparison, benchmark CLI |
-| `analysis.py` | Follow-up: four rerankers on the same candidates, with significance tests |
-| `bi_encoder_grid.py` | Follow-up: seven bi-encoders × five reranker settings |
-| `prepare_data.py` | Dataset download, corpus construction, PubMed fetch, embeddings |
-| `tests/test_evaluation.py` | Unit tests for metrics and search |
+| `app.py` | Streamlit interface |
+| `data.py` | File paths and data loaders |
+| `retrieval.py` | Default bi-encoder and dot-product search |
+| `reranker.py` | Default cross-encoder and reranking |
+| `evaluation.py` | Metrics, timing and the Experiment 1 benchmark |
+| `analysis.py` | Experiment 2 |
+| `bi_encoder_grid.py` | Experiment 3 |
+| `prepare_data.py` | Dataset download, corpus construction and embeddings |
+| `tests/test_evaluation.py` | Metric and search tests |
+
+## Data and evaluation
+
+- **Dataset:** the official BioASQ Task 11b training set (4,719 questions, CC BY 2.5), from an
+  unchanged copy in
+  [`rag-datasets/rag-mini-bioasq`](https://huggingface.co/datasets/rag-datasets/rag-mini-bioasq),
+  pinned to commit `224a87f` and verified by SHA-256.
+- **Questions:** 100 sampled with seed 13 from those with 2–10 relevant documents (20 factoid,
+  19 list, 29 yes/no, 32 summary).
+- **Labels:** BioASQ's own document annotations, unchanged. A document counts as relevant only
+  if BioASQ lists it for that question.
+- **Corpus:** 522 relevant documents plus 1,978 distractors, which are relevant documents of
+  other, randomly sampled BioASQ questions. Titles and abstracts come from PubMed, and 14
+  records without abstracts were dropped. `data/metadata.json` records the provenance.
+- **Metrics (binary relevance, averaged over questions):**
+  - **Recall@k:** share of a question's relevant documents in the top k. It can't reach 1 at
+    k = 5 when a question has more than 5 relevant documents.
+  - **MRR@5:** 1 / rank of the first relevant document, or 0 if none is in the top 5.
+  - **nDCG@5:** ranking quality relative to a perfect ordering.
+- **Latency:** `time.perf_counter()`, one question at a time, after a discarded warm-up query.
+  Model loading and corpus embedding are excluded.
